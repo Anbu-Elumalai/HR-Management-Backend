@@ -1,15 +1,18 @@
 import { IsString, IsNotEmpty, IsEnum, IsOptional } from "class-validator";
 
 
-export class CreateDepartmentDto {
+export class CreateMasterDataDto {
     @IsString()
     @IsNotEmpty()
     name: string;
 
 }
 
-export class UpdateDepartmentDto {
+export class UpdateMasterDataDto {
     @IsString()
     @IsOptional()
     name?: string;
+
+    @IsOptional()
+    isActive?: number;
 }

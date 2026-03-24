@@ -11,7 +11,8 @@ import {
     Req,
     UseBefore,
     HttpCode,
-    QueryParams
+    QueryParams,
+    Put
 } from "routing-controllers";
 import { Response, Request } from "express";
 import { StatusCodes } from "http-status-codes";
@@ -87,9 +88,26 @@ export class ProjectController {
                 ];
             }
 
+            if (query.name) match.name = { $regex: query.name, $options: "i" };
             if (query.manager) match.manager = { $regex: query.manager, $options: "i" };
             if (query.location) match.location = { $regex: query.location, $options: "i" };
             if (query.status) match.status = query.status;
+
+            if (query.startDate) {
+                const startOfDay = new Date(query.startDate);
+                startOfDay.setUTCHours(0, 0, 0, 0);
+                const endOfDay = new Date(query.startDate);
+                endOfDay.setUTCHours(23, 59, 59, 999);
+                match.startDate = { $gte: startOfDay, $lte: endOfDay };
+            }
+
+            if (query.endDate) {
+                const startOfDay = new Date(query.endDate);
+                startOfDay.setUTCHours(0, 0, 0, 0);
+                const endOfDay = new Date(query.endDate);
+                endOfDay.setUTCHours(23, 59, 59, 999);
+                match.endDate = { $gte: startOfDay, $lte: endOfDay };
+            }
 
             if (query.isActive !== undefined && !query.status) { // Only if status param isn't hijacking it
                 match.isActive = (query.isActive === "true" || query.isActive === "1" || query.isActive === 1) ? 1 : 0;
@@ -131,7 +149,7 @@ export class ProjectController {
         }
     }
 
-    @Patch("/:id")
+    @Put("/:id")
     async update(
         @Param("id") id: string,
         @Body() body: UpdateProjectDto,

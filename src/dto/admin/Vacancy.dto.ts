@@ -23,13 +23,10 @@ export class CreateVacancyDto {
     @IsNotEmpty()
     positionId: string;
 
-    @IsString()
-    @IsNotEmpty()
-    reportingToName: string;
+    @IsOptional()
+    // @IsMongoId()
+    reportingToId: string;
 
-    @IsString()
-    @IsNotEmpty()
-    reportingCode: string;
 
     @IsMongoId()
     @IsNotEmpty()
@@ -56,7 +53,7 @@ export class CreateVacancyDto {
     @IsNotEmpty()
     qualification: string;
 
-    @IsString()
+    @IsMongoId()
     @IsNotEmpty()
     reasonForRequisition: string;
 
@@ -82,6 +79,18 @@ export class CreateVacancyDto {
     @IsString()
     @IsNotEmpty()
     jobDescription: string;
+
+    @IsString()
+    @IsOptional()
+    status?: string;
+
+    @IsString()
+    @IsOptional()
+    approvalStatus?: string;
+
+    @IsOptional()
+    @IsDateString()
+    scheduleDate?: string;
 }
 
 export class UpdateVacancyDto {
@@ -98,12 +107,9 @@ export class UpdateVacancyDto {
     positionId?: string;
 
     @IsOptional()
-    @IsString()
-    reportingToName?: string;
+    @IsMongoId()
+    reportingToId?: string;
 
-    @IsOptional()
-    @IsString()
-    reportingCode?: string;
 
     @IsOptional()
     @IsMongoId()
@@ -132,7 +138,7 @@ export class UpdateVacancyDto {
     qualification?: string;
 
     @IsOptional()
-    @IsString()
+    @IsMongoId()
     reasonForRequisition?: string;
 
     @IsOptional()
@@ -159,6 +165,18 @@ export class UpdateVacancyDto {
     @IsOptional()
     @IsString()
     jobDescription?: string;
+
+    @IsString()
+    @IsOptional()
+    status?: string;
+
+    @IsString()
+    @IsOptional()
+    approvalStatus?: string;
+
+    @IsOptional()
+    @IsDateString()
+    scheduleDate?: string;
 
     @IsOptional()
     @Type(() => Number)

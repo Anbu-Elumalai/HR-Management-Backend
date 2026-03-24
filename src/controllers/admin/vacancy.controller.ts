@@ -49,21 +49,23 @@ export class VacancyController {
             vacancy.requisitionDate = new Date(body.requisitionDate);
             vacancy.departmentId = new ObjectId(body.departmentId);
             vacancy.positionId = new ObjectId(body.positionId);
-            vacancy.reportingToName = body.reportingToName;
-            vacancy.reportingCode = body.reportingCode;
+            vacancy.reportingToId = new ObjectId(body.reportingToId);
             vacancy.employeeTypeId = new ObjectId(body.employeeTypeId);
             vacancy.gender = body.gender;
             vacancy.numberOfVacancy = body.numberOfVacancy;
             vacancy.requiredDate = new Date(body.requiredDate);
             vacancy.preferredEducation = body.preferredEducation;
             vacancy.qualification = body.qualification;
-            vacancy.reasonForRequisition = body.reasonForRequisition;
+            vacancy.reasonForRequisition = new ObjectId(body.reasonForRequisition) ?? null;
             vacancy.salaryRangeFrom = body.salaryRangeFrom;
             vacancy.salaryRangeTo = body.salaryRangeTo;
             vacancy.projectCode = body.projectCode ? new ObjectId(body.projectCode) : null;
             vacancy.jobDescription = body.jobDescription;
             vacancy.createdBy = new ObjectId(userId);
             vacancy.updatedBy = new ObjectId(userId);
+            vacancy.status = body.status || 'draft';
+            vacancy.approvalStatus = body.approvalStatus || 'pending';
+            vacancy.scheduleDate = body.scheduleDate ? new Date(body.scheduleDate) : null;
             vacancy.isActive = 1;
             vacancy.isDelete = 0;
 
@@ -106,8 +108,6 @@ export class VacancyController {
             if (search) {
                 match.$or = [
                     { requestNumber: { $regex: search, $options: "i" } },
-                    { reportingToName: { $regex: search, $options: "i" } },
-                    { reportingCode: { $regex: search, $options: "i" } },
                     { projectCode: { $regex: search, $options: "i" } },
                     { projectName: { $regex: search, $options: "i" } }
                 ];
@@ -157,6 +157,24 @@ export class VacancyController {
                     }
                 },
                 { $unwind: { path: "$employeeType", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "adminusers",
+                        localField: "reportingToId",
+                        foreignField: "_id",
+                        as: "reportingTo"
+                    }
+                },
+                { $unwind: { path: "$reportingTo", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "reason_requisitions",
+                        localField: "reasonForRequisition",
+                        foreignField: "_id",
+                        as: "reason"
+                    }
+                },
+                { $unwind: { path: "$reason", preserveNullAndEmptyArrays: true } },
                 { $sort: { createdAt: -1 } },
                 {
                     $facet: {
@@ -212,15 +230,14 @@ export class VacancyController {
             if (body.requisitionDate) vacancy.requisitionDate = new Date(body.requisitionDate);
             if (body.departmentId) vacancy.departmentId = new ObjectId(body.departmentId);
             if (body.positionId) vacancy.positionId = new ObjectId(body.positionId);
-            if (body.reportingToName) vacancy.reportingToName = body.reportingToName;
-            if (body.reportingCode) vacancy.reportingCode = body.reportingCode;
+            if (body.reportingToId) vacancy.reportingToId = new ObjectId(body.reportingToId);
             if (body.employeeTypeId) vacancy.employeeTypeId = new ObjectId(body.employeeTypeId);
             if (body.gender) vacancy.gender = body.gender;
             if (body.numberOfVacancy) vacancy.numberOfVacancy = body.numberOfVacancy;
             if (body.requiredDate) vacancy.requiredDate = new Date(body.requiredDate);
             if (body.preferredEducation) vacancy.preferredEducation = body.preferredEducation;
             if (body.qualification) vacancy.qualification = body.qualification;
-            if (body.reasonForRequisition) vacancy.reasonForRequisition = body.reasonForRequisition;
+            if (body.reasonForRequisition) vacancy.reasonForRequisition = new ObjectId(body.reasonForRequisition) ?? null;
             if (body.salaryRangeFrom) vacancy.salaryRangeFrom = body.salaryRangeFrom;
             if (body.salaryRangeTo) vacancy.salaryRangeTo = body.salaryRangeTo;
             if (body.projectCode !== undefined) {
@@ -228,6 +245,11 @@ export class VacancyController {
             }
             if (body.jobDescription) vacancy.jobDescription = body.jobDescription;
             if (body.isActive !== undefined) vacancy.isActive = body.isActive;
+            if (body.status) vacancy.status = body.status;
+            if (body.approvalStatus) vacancy.approvalStatus = body.approvalStatus;
+            if (body.scheduleDate !== undefined) {
+                vacancy.scheduleDate = body.scheduleDate ? new Date(body.scheduleDate) : null;
+            }
 
             const files = (req as any).files;
             if (files && files.file) {
@@ -274,6 +296,19 @@ export class VacancyController {
         }
     }
 
+    @Get('/code/generate')
+    async generateCode(@Res() res: Response) {
+        try {
+            const code = await generateVacancyRequestNumber();
+
+            if (!code) {
+                return response(res, StatusCodes.NOT_FOUND, "Vacancy not found");
+            }
+            return response(res, StatusCodes.OK, "Vacancy fetched successfully", code);
+        } catch (error) {
+            return handleErrorResponse(error, res);
+        }
+    }
     private async getAggregatedVacancy(id: ObjectId) {
         const pipeline: any[] = [
             { $match: { _id: id, isDelete: 0 } },
@@ -303,7 +338,25 @@ export class VacancyController {
                     as: "employeeType"
                 }
             },
-            { $unwind: { path: "$employeeType", preserveNullAndEmptyArrays: true } }
+            { $unwind: { path: "$employeeType", preserveNullAndEmptyArrays: true } },
+            {
+                $lookup: {
+                    from: "adminusers",
+                    localField: "reportingToId",
+                    foreignField: "_id",
+                    as: "reportingTo"
+                }
+            },
+            { $unwind: { path: "$reportingTo", preserveNullAndEmptyArrays: true } },
+            {
+                $lookup: {
+                    from: "reason_requisitions",
+                    localField: "reasonForRequisition",
+                    foreignField: "_id",
+                    as: "reason"
+                }
+            },
+            { $unwind: { path: "$reason", preserveNullAndEmptyArrays: true } }
         ];
 
         const [result] = await this.vacancyRepo.aggregate(pipeline).toArray();

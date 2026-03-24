@@ -37,11 +37,11 @@ export class CreateProjectDto {
     status: ProjectStatus = ProjectStatus.ACTIVE;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     manager: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     location: string;
 }
 

@@ -21,10 +21,7 @@ export class Vacancy {
     positionId: ObjectId
 
     @Column()
-    reportingToName: string
-
-    @Column()
-    reportingCode: string
+    reportingToId: ObjectId
 
     @Column()
     employeeTypeId: ObjectId
@@ -45,7 +42,7 @@ export class Vacancy {
     qualification: string
 
     @Column()
-    reasonForRequisition: string
+    reasonForRequisition: ObjectId
 
     @Column()
     salaryRangeFrom: number
@@ -77,6 +74,15 @@ export class Vacancy {
 
     @Column({ default: 0 })
     isDelete: number
+
+    @Column({ default: 'draft' })
+    status: string
+
+    @Column({ default: 'pending' })
+    approvalStatus: string
+
+    @Column({ default: null })
+    scheduleDate: Date
 
     @CreateDateColumn()
     createdAt: Date

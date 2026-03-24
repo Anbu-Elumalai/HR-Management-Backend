@@ -42,11 +42,11 @@ AppDataSource.initialize()
 
     const isProd = process.env.NODE_ENV === "prod";
     useExpressServer(app, {
-      routePrefix: "/api/admin",
+      routePrefix: "/api",
       controllers: [
         isProd
-          ? __dirname + "/controllers/admin/**/*.js"
-          : __dirname + "/controllers/admin/**/*.ts"
+          ? __dirname + "/controllers/**/*.js"
+          : __dirname + "/controllers/**/*.ts"
       ],
       middlewares: [
         isProd
@@ -57,23 +57,6 @@ AppDataSource.initialize()
       validation: true,
       classTransformer: true,
 
-    });
-
-    useExpressServer(app, {
-      routePrefix: "/api/mobile",
-      controllers: [
-        isProd
-          ? __dirname + "/controllers/mobile/**/*.js"
-          : __dirname + "/controllers/mobile/**/*.ts"
-      ],
-      middlewares: [
-        isProd
-          ? __dirname + "/middlewares/**/*.js"
-          : __dirname + "/middlewares/**/*.ts"
-      ],
-      defaultErrorHandler: false,
-      validation: true,
-      classTransformer: true,
     });
 
     app.get("/", (_req, res) => {

@@ -182,3 +182,19 @@ export class UpdateVacancyDto {
     @Type(() => Number)
     isActive?: number;
 }
+
+export class UpdateVacancyStatusDto {
+    @IsString()
+    @IsNotEmpty()
+    status: string;
+
+    @IsOptional()
+    @IsDateString()
+    scheduleDate?: string;
+}
+
+export class UpdateVacancyApprovalDto {
+    @IsString()
+    @IsNotEmpty()
+    approvalStatus: string;
+}

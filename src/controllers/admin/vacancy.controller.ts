@@ -11,7 +11,8 @@ import {
     Req,
     UseBefore,
     HttpCode,
-    QueryParams
+    QueryParams,
+    Put
 } from "routing-controllers";
 import { Response, Request } from "express";
 import { StatusCodes } from "http-status-codes";
@@ -19,7 +20,7 @@ import { ObjectId } from "mongodb";
 import { AuthMiddleware, AuthPayload } from "../../middlewares/AuthMiddleware";
 import { AppDataSource } from "../../data-source";
 import { Vacancy } from "../../entity/Vacancy";
-import { CreateVacancyDto, UpdateVacancyDto } from "../../dto/admin/Vacancy.dto";
+import { CreateVacancyDto, UpdateVacancyDto, UpdateVacancyStatusDto, UpdateVacancyApprovalDto } from "../../dto/admin/Vacancy.dto";
 import { handleErrorResponse, pagination, response } from "../../utils";
 import { generateVacancyRequestNumber } from "../../utils/id.generator";
 import imageService from "../../utils/upload";
@@ -49,14 +50,14 @@ export class VacancyController {
             vacancy.requisitionDate = new Date(body.requisitionDate);
             vacancy.departmentId = new ObjectId(body.departmentId);
             vacancy.positionId = new ObjectId(body.positionId);
-            vacancy.reportingToId = new ObjectId(body.reportingToId);
+            vacancy.reportingToId = body.reportingToId ? new ObjectId(body.reportingToId) : null;
             vacancy.employeeTypeId = new ObjectId(body.employeeTypeId);
             vacancy.gender = body.gender;
             vacancy.numberOfVacancy = body.numberOfVacancy;
             vacancy.requiredDate = new Date(body.requiredDate);
             vacancy.preferredEducation = body.preferredEducation;
             vacancy.qualification = body.qualification;
-            vacancy.reasonForRequisition = new ObjectId(body.reasonForRequisition) ?? null;
+            vacancy.reasonForRequisition = body.reasonForRequisition ? new ObjectId(body.reasonForRequisition) : null;
             vacancy.salaryRangeFrom = body.salaryRangeFrom;
             vacancy.salaryRangeTo = body.salaryRangeTo;
             vacancy.projectCode = body.projectCode ? new ObjectId(body.projectCode) : null;
@@ -113,20 +114,31 @@ export class VacancyController {
                 ];
             }
 
+            // --- Column Filters (Direct Entity Matches) ---
+            if (query.vacancyCode) {
+                match.requestNumber = { $regex: query.vacancyCode, $options: "i" };
+            }
+            if (query.vacancies) {
+                match.numberOfVacancy = Number(query.vacancies);
+            }
+            if (query.targetDate) {
+                match.requiredDate = new Date(query.targetDate);
+            }
+            if (query.approval) {
+                match.approvalStatus = { $regex: query.approval, $options: "i" };
+            }
+
             if (query.departmentId) match.departmentId = new ObjectId(query.departmentId);
             if (query.positionId) match.positionId = new ObjectId(query.positionId);
             if (query.employeeTypeId) match.employeeTypeId = new ObjectId(query.employeeTypeId);
             if (query.gender) match.gender = query.gender;
 
             if (query.status) {
-                const status = query.status.toLowerCase();
-                if (status === "active") match.isActive = 1;
-                else if (status === "inactive") match.isActive = 0;
+                match.status = { $regex: query.status, $options: "i" };
             }
             if (query.isActive !== undefined && !query.status) {
                 match.isActive = (query.isActive === "true" || query.isActive === "1" || query.isActive === 1) ? 1 : 0;
             }
-
 
             const pipeline: any[] = [
                 { $match: match },
@@ -168,21 +180,44 @@ export class VacancyController {
                 { $unwind: { path: "$reportingTo", preserveNullAndEmptyArrays: true } },
                 {
                     $lookup: {
-                        from: "reason_requisitions",
-                        localField: "reasonForRequisition",
+                        from: "projects",
+                        localField: "projectCode",
                         foreignField: "_id",
-                        as: "reason"
+                        as: "projectData"
                     }
                 },
-                { $unwind: { path: "$reason", preserveNullAndEmptyArrays: true } },
-                { $sort: { createdAt: -1 } },
+                { $unwind: { path: "$projectData", preserveNullAndEmptyArrays: true } },
+                // Add computed fields for filtering logic
                 {
-                    $facet: {
-                        data: [{ $skip: page * limit }, { $limit: limit }],
-                        meta: [{ $count: "total" }]
+                    $addFields: {
+                        filledPositions: 0,
+                        remainingPositions: "$numberOfVacancy"
                     }
                 }
             ];
+
+            // --- Column Filters (Joined Fields Matches) ---
+            const postMatch: any = {};
+
+            if (query.position) postMatch["position.name"] = { $regex: query.position, $options: "i" };
+            if (query.department) postMatch["department.name"] = { $regex: query.department, $options: "i" };
+            if (query.hiringType) postMatch["employeeType.name"] = { $regex: query.hiringType, $options: "i" };
+            if (query.project) postMatch["projectData.name"] = { $regex: query.project, $options: "i" };
+
+            if (query.filled) postMatch.filledPositions = Number(query.filled);
+            if (query.remaining) postMatch.remainingPositions = Number(query.remaining);
+
+            if (Object.keys(postMatch).length > 0) {
+                pipeline.push({ $match: postMatch });
+            }
+
+            pipeline.push({ $sort: { createdAt: -1 } });
+            pipeline.push({
+                $facet: {
+                    data: [{ $skip: page * limit }, { $limit: limit }],
+                    meta: [{ $count: "total" }]
+                }
+            });
 
             const [result] = await this.vacancyRepo.aggregate(pipeline).toArray();
             const data = result?.data || [];
@@ -210,7 +245,7 @@ export class VacancyController {
         }
     }
 
-    @Patch("/:id")
+    @Put("/:id")
     async update(
         @Param("id") id: string,
         @Body() body: UpdateVacancyDto,
@@ -272,6 +307,63 @@ export class VacancyController {
 
             // const data = await this.getAggregatedVacancy(new ObjectId(id));
             return response(res, StatusCodes.OK, "Vacancy updated successfully", result);
+        } catch (error) {
+            return handleErrorResponse(error, res);
+        }
+    }
+
+    @Patch("/:id/status")
+    async updateStatus(
+        @Param("id") id: string,
+        @Body() body: UpdateVacancyStatusDto,
+        @Req() req: RequestWithUser,
+        @Res() res: Response
+    ) {
+        try {
+            const { userId } = req.user;
+            const vacancy = await this.vacancyRepo.findOne({
+                where: { _id: new ObjectId(id), isDelete: 0 }
+            });
+
+            if (!vacancy) {
+                return response(res, StatusCodes.NOT_FOUND, "Vacancy not found");
+            }
+
+            vacancy.status = body.status;
+            if (body.scheduleDate !== undefined) {
+                vacancy.scheduleDate = body.scheduleDate ? new Date(body.scheduleDate) : null;
+            }
+            vacancy.updatedBy = new ObjectId(userId);
+
+            const result = await this.vacancyRepo.save(vacancy);
+            return response(res, StatusCodes.OK, "Vacancy status updated successfully", result);
+        } catch (error) {
+            return handleErrorResponse(error, res);
+        }
+    }
+
+    @Patch("/:id/approval")
+    async updateApprovalStatus(
+        @Param("id") id: string,
+        @Body() body: UpdateVacancyApprovalDto,
+        @Req() req: RequestWithUser,
+        @Res() res: Response
+    ) {
+        try {
+            const { userId } = req.user;
+            const vacancy = await this.vacancyRepo.findOne({
+                where: { _id: new ObjectId(id), isDelete: 0 }
+            });
+
+            if (!vacancy) {
+                return response(res, StatusCodes.NOT_FOUND, "Vacancy not found");
+            }
+
+            vacancy.approvalStatus = body.approvalStatus;
+            vacancy.updatedBy = new ObjectId(userId);
+
+            const result = await this.vacancyRepo.save(vacancy);
+            return response(res, StatusCodes.OK, "Vacancy approval status updated successfully", result);
         } catch (error) {
             return handleErrorResponse(error, res);
         }

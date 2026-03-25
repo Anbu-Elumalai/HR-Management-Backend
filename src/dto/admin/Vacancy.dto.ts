@@ -89,6 +89,14 @@ export class CreateVacancyDto {
     approvalStatus?: string;
 
     @IsOptional()
+    @IsString()
+    skills?: string;
+
+    @IsOptional()
+    @IsString()
+    location?: string;
+
+    @IsOptional()
     @IsDateString()
     scheduleDate?: string;
 }
@@ -173,6 +181,14 @@ export class UpdateVacancyDto {
     @IsString()
     @IsOptional()
     approvalStatus?: string;
+
+    @IsOptional()
+    @IsString()
+    skills?: string;
+
+    @IsOptional()
+    @IsString()
+    location?: string;
 
     @IsOptional()
     @IsDateString()

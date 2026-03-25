@@ -57,6 +57,12 @@ export class Vacancy {
         originalName?: string;
     };
 
+    @Column({ nullable: true })
+    skills: string
+
+    @Column({ nullable: true })
+    location: string
+
     @Column()
     projectCode: ObjectId
 

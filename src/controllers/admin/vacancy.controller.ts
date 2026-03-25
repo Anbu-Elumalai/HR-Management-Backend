@@ -69,6 +69,8 @@ export class VacancyController {
             vacancy.scheduleDate = body.scheduleDate ? new Date(body.scheduleDate) : null;
             vacancy.isActive = 1;
             vacancy.isDelete = 0;
+            vacancy.skills = body.skills;
+            vacancy.location = body.location;
 
             const files = (req as any).files;
             if (files && files.file) {
@@ -285,6 +287,8 @@ export class VacancyController {
             if (body.scheduleDate !== undefined) {
                 vacancy.scheduleDate = body.scheduleDate ? new Date(body.scheduleDate) : null;
             }
+            if (body.skills !== undefined) vacancy.skills = body.skills;
+            if (body.location !== undefined) vacancy.location = body.location;
 
             const files = (req as any).files;
             if (files && files.file) {
@@ -333,6 +337,7 @@ export class VacancyController {
             if (body.scheduleDate !== undefined) {
                 vacancy.scheduleDate = body.scheduleDate ? new Date(body.scheduleDate) : null;
             }
+            
             vacancy.updatedBy = new ObjectId(userId);
 
             const result = await this.vacancyRepo.save(vacancy);

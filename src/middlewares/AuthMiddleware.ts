@@ -10,6 +10,7 @@ import { Admin } from "../entity/Admin";
 import { AdminUser } from "../entity/AdminUser";
 import { ObjectId } from "mongodb";
 import { UserToken } from "../entity/UserToken";
+import { handleErrorResponse } from "../utils";
 
 
 export interface AuthPayload {
@@ -85,9 +86,10 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
             next();
         } catch (error: any) {
             if (error instanceof UnauthorizedError) {
-                throw error;
+                handleErrorResponse(error, _res);
             }
-            throw new UnauthorizedError("Invalid or expired token");
+            handleErrorResponse(error, _res);
+
         }
     }
 }

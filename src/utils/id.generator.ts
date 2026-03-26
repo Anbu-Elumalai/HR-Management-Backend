@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { AdminUser } from "../entity/AdminUser";
 import { Project } from "../entity/Project";
 import { Vacancy } from "../entity/Vacancy";
+import { Candidate } from "../entity/Candidate";
 
 export async function generateAdminUserId(): Promise<string> {
     try {
@@ -64,6 +65,29 @@ export async function generateProjectCode(): Promise<string> {
         return newId;
     } catch (err) {
         // Project entity might not be loaded when this first runs, similar to Vacancy
+        throw err;
+    }
+}
+
+export async function generateCandidateCode(): Promise<string> {
+    try {
+        const lastCandidate = await AppDataSource.getMongoRepository(Candidate).findOne({
+            where: {},
+            order: { createdAt: "DESC" as any }
+        });
+
+        const year = new Date().getFullYear();
+        const prefix = `CAN-${year}-`;
+
+        let numeric = 0;
+        if (lastCandidate && lastCandidate.candidateCode && lastCandidate.candidateCode.startsWith(prefix)) {
+            const lastIdSequence = lastCandidate.candidateCode.replace(prefix, '');
+            numeric = parseInt(lastIdSequence) || 0;
+        }
+
+        const newId = `${prefix}${(numeric + 1).toString().padStart(3, '0')}`;
+        return newId;
+    } catch (err) {
         throw err;
     }
 }

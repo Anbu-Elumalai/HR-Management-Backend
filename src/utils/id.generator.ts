@@ -4,6 +4,7 @@ import { AdminUser } from "../entity/AdminUser";
 import { Project } from "../entity/Project";
 import { Vacancy } from "../entity/Vacancy";
 import { Candidate } from "../entity/Candidate";
+import { Interview } from "../entity/Interview";
 
 export async function generateAdminUserId(): Promise<string> {
     try {
@@ -82,6 +83,30 @@ export async function generateCandidateCode(): Promise<string> {
         let numeric = 0;
         if (lastCandidate && lastCandidate.candidateCode && lastCandidate.candidateCode.startsWith(prefix)) {
             const lastIdSequence = lastCandidate.candidateCode.replace(prefix, '');
+            numeric = parseInt(lastIdSequence) || 0;
+        }
+
+        const newId = `${prefix}${(numeric + 1).toString().padStart(3, '0')}`;
+        return newId;
+    } catch (err) {
+        throw err;
+    }
+}
+
+export async function generateInterviewCode(): Promise<string> {
+    try {
+        const lastInterview = await AppDataSource.getMongoRepository(Interview).findOne({
+            where: {},
+            order: { createdAt: "DESC" as any }
+        });
+
+        // Format: INT-YYYY-NNN
+        const year = new Date().getFullYear();
+        const prefix = `INT-${year}-`;
+
+        let numeric = 0;
+        if (lastInterview && lastInterview.interviewCode && lastInterview.interviewCode.startsWith(prefix)) {
+            const lastIdSequence = lastInterview.interviewCode.replace(prefix, '');
             numeric = parseInt(lastIdSequence) || 0;
         }
 

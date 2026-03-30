@@ -739,6 +739,14 @@ export class InterviewController {
                     candidate.status = "Offer Sent";
                 } else if (result === 'hired' || result === 'hire') {
                     candidate.status = "Hired";
+                } else if (result === 'on hold') {
+                    candidate.status = "On Hold";
+                } else if (result === 'passed') {
+                    candidate.status = "Passed";
+                } else if (result === 'failed') {
+                    candidate.status = "Failed";
+                } else if (result === 'move to offer') {
+                    candidate.status = "Move to Offer";
                 } else {
                     candidate.status = "Interview";
                 }
@@ -751,7 +759,6 @@ export class InterviewController {
                 status: interview.status,
                 feedback: interview.feedback,
                 interviewResult: interview.interviewResult,
-                interviewStatus: interview.interviewStatus,
                 updatedBy: new ObjectId(userId)
             });
 

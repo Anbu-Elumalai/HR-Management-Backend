@@ -5,6 +5,7 @@ import { Project } from "../entity/Project";
 import { Vacancy } from "../entity/Vacancy";
 import { Candidate } from "../entity/Candidate";
 import { Interview } from "../entity/Interview";
+import { Offer } from "../entity/Offer";
 
 export async function generateAdminUserId(): Promise<string> {
     try {
@@ -96,7 +97,7 @@ export async function generateCandidateCode(): Promise<string> {
 export async function generateInterviewCode(): Promise<string> {
     try {
         const lastInterview = await AppDataSource.getMongoRepository(Interview).findOne({
-            where: {},
+            where: { isDelete: 0 },
             order: { createdAt: "DESC" as any }
         });
 
@@ -107,6 +108,29 @@ export async function generateInterviewCode(): Promise<string> {
         let numeric = 0;
         if (lastInterview && lastInterview.interviewCode && lastInterview.interviewCode.startsWith(prefix)) {
             const lastIdSequence = lastInterview.interviewCode.replace(prefix, '');
+            numeric = parseInt(lastIdSequence) || 0;
+        }
+
+        const newId = `${prefix}${(numeric + 1).toString().padStart(3, '0')}`;
+        return newId;
+    } catch (err) {
+        throw err;
+    }
+}
+
+export async function generateOfferCode(): Promise<string> {
+    try {
+        const lastOffer = await AppDataSource.getMongoRepository(Offer).findOne({
+            where: { isDelete: 0 },
+            order: { createdAt: "DESC" as any }
+        });
+
+        const year = new Date().getFullYear();
+        const prefix = `OFF-${year}-`;
+
+        let numeric = 0;
+        if (lastOffer && lastOffer.offerCode && lastOffer.offerCode.startsWith(prefix)) {
+            const lastIdSequence = lastOffer.offerCode.replace(prefix, '');
             numeric = parseInt(lastIdSequence) || 0;
         }
 

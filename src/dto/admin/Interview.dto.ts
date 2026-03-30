@@ -233,8 +233,4 @@ export class UpdateInterviewFeedbackDto {
     @IsString()
     @IsNotEmpty()
     interviewResult: string;
-
-    @IsString()
-    @IsNotEmpty()
-    interviewStatus: string;
 }

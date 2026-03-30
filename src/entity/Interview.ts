@@ -43,9 +43,6 @@ export class Interview {
     @Column({ default: 'Scheduled' })
     status: string
 
-    @Column({ nullable: true })
-    interviewStatus: string
-
     @Column()
     email: string
 

@@ -10,6 +10,7 @@ import { Admin } from "../entity/Admin";
 import { AdminUser } from "../entity/AdminUser";
 import { ObjectId } from "mongodb";
 import { UserToken } from "../entity/UserToken";
+import { Role } from "../entity/Role.Permission";
 import { handleErrorResponse } from "../utils";
 
 
@@ -69,6 +70,15 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
                 throw new UnauthorizedError("Account is inactive. Please contact admin.");
             }
 
+            // Load Role with permissions
+            let role = null;
+            if (user.roleId) {
+                role = await AppDataSource.getMongoRepository(Role).findOneBy({
+                    _id: new ObjectId(user.roleId),
+                    isDelete: 0
+                });
+            }
+
             const activeTokenRecord = await AppDataSource.getMongoRepository(UserToken).findOneBy({
                 userId: new ObjectId(userId),
                 token: token
@@ -80,7 +90,9 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
 
             (req as any).user = {
                 ...decoded,
-                userId: decoded.id
+                userId: decoded.id,
+                roleId: user.roleId?.toString() || decoded.roleId,
+                role: role // attach full role object with permissions
             };
 
             next();

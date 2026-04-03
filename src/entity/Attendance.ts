@@ -33,37 +33,37 @@ export interface ILocation {
 export class Attendance {
 
   @ObjectIdColumn()
-  _id: ObjectId;
+  _id!: ObjectId;
 
   @Column()
-  memberId: ObjectId;
+  memberId!: ObjectId;
 
   @Column()
-  sourceId: ObjectId;
+  sourceId!: ObjectId;
 
   @Column()
-  sourceType: SourceType;
+  sourceType!: SourceType;
 
   @Column()
   userLocation?: ILocation;
 
   @Column()
-  createdBy: ObjectId;
+  createdBy!: ObjectId;
 
   @Column({ nullable: true })
   updatedBy?: ObjectId;
 
   @Column()
-  status: AttendanceStatus;
+  status!: AttendanceStatus;
 
   @Column({ default: 1 })
-  isActive: number;
+  isActive!: number;
 
   @Column({ default: 0 })
-  isDelete: number;
+  isDelete!: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
   updatedAt?: Date;

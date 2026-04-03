@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { useExpressServer } from "routing-controllers";
 import { AppDataSource } from "./data-source";
@@ -7,6 +7,7 @@ import fileUpload from "express-fileupload";
 
 import { seedDefaultAdmin } from "./seed/admin";
 import { seedDefaultModules } from "./seed/modules";
+import { offerCronService } from "./services/offer-cron.service";
 
 
 
@@ -17,6 +18,12 @@ AppDataSource.initialize()
 
     await seedDefaultAdmin();
     await seedDefaultModules();
+
+    // Initialize offer cron service (runs daily at 10 AM)
+    await offerCronService.initialize();
+
+    // Also run an immediate check on startup to update any expired offers
+    offerCronService.runManually().catch(console.error);
 
     const app = express();
 
@@ -69,7 +76,7 @@ AppDataSource.initialize()
       });
     });
 
-    app.use((err, _req, res, _next) => {
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error(err);
       res.status(err.httpCode || 500).json({
         message: err.message,

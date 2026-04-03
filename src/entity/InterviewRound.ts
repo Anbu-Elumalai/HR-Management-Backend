@@ -5,26 +5,26 @@ import { ObjectId } from "mongodb";
 export class InterviewRound {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId;
 
     @Column()
-    name: string
+    name!: string;
 
     @Column({ default: 1 })
-    isActive: number
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number
+    isDelete!: number;
 
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date
+    updatedAt!: Date;
 }

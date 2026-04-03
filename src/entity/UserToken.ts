@@ -4,20 +4,20 @@ import { ObjectId } from "mongodb";
 @Entity("user_tokens")
 export class UserToken {
     @ObjectIdColumn()
-    _id: ObjectId;
+    _id!: ObjectId;
 
     @Column()
-    userId: ObjectId;
+    userId!: ObjectId;
 
     @Column()
-    userType: "ADMIN" | "ADMIN_USER" | "MEMBER";
+    userType!: "ADMIN" | "ADMIN_USER" | "MEMBER";
 
     @Column()
-    token: string;
+    token!: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    updatedAt!: Date;
 }

@@ -4,10 +4,10 @@ import { ObjectId } from "mongodb";
 export class AdminUser {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId;
 
     @Column()
-    userId: string
+    userId!: string;
 
     @Column("simple-json", { nullable: true })
     profileImage?: {
@@ -17,38 +17,38 @@ export class AdminUser {
     };
 
     @Column()
-    name: string
+    name!: string;
 
     @Column()
-    email: string
+    email!: string;
 
     @Column()
-    companyName: string
+    companyName!: string;
 
     @Column()
-    phoneNumber: string
+    phoneNumber!: string;
 
     @Column()
-    pin: string
+    pin!: string;
 
     @Column()
-    roleId: ObjectId
+    roleId!: ObjectId;
 
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 
     @Column({ default: 1 })
-    isActive: number
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date
+    updatedAt!: Date;
 }

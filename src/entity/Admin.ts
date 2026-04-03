@@ -4,35 +4,38 @@ import { ObjectId } from "mongodb";
 export class Admin {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId;
 
     @Column()
-    name: string
+    name!: string;
 
     @Column()
-    email: string
+    email!: string;
 
     @Column()
-    companyName: string
+    companyName!: string;
 
     @Column()
-    phoneNumber: string
+    phoneNumber!: string;
 
     @Column()
-    pin: string
+    pin!: string;
 
     @Column()
-    role: string
+    role!: string;
+
+    @Column({ nullable: true })
+    roleId!: ObjectId; // Reference to roles collection for RBAC
 
     @Column({ default: 1 })
-    isActive: number
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date
+    updatedAt!: Date;
 }

@@ -6,47 +6,47 @@ import { ObjectId } from "mongodb";
 export class Project {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId;
 
     @Column()
-    name: string
+    name!: string;
 
     @Column()
-    code: string
+    code!: string;
 
     @Column()
-    description: string
+    description!: string;
 
     @Column()
-    startDate: Date
+    startDate!: Date;
 
     @Column()
-    endDate: Date
+    endDate!: Date;
 
     @Column()
-    status: string
+    status!: string;
 
     @Column()
-    manager: string
+    manager!: string;
 
     @Column()
-    location: string
+    location!: string;
 
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 
     @Column({ default: 1 })
-    isActive: number
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date
+    updatedAt!: Date;
 }

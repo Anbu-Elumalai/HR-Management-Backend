@@ -2,9 +2,9 @@ import { ObjectId } from "mongodb";
 import { Role } from "../entity/Role.Permission";
 
 export function hasPermission(
-    role: Role,
+    role: Role | undefined,
     moduleId: string | ObjectId,
-    action: "view" | "add" | "edit" | "delete"
+    action: "view" | "add" | "edit" | "delete" | "approve"
 ): boolean {
     if (!role?.permissions?.length) return false;
 
@@ -15,7 +15,11 @@ export function hasPermission(
         p => p.moduleId.toString() === moduleObjectId.toString()
     );
 
-    return Boolean(permission?.actions?.[action]);
+    // Treat 'approve' as 'edit' for now (approval is a form of edit)
+    // Future: add 'approve' action to Role permissions schema
+    const checkAction = action === 'approve' ? 'edit' : action;
+
+    return Boolean(permission?.actions?.[checkAction]);
 }
 function calculateYearsBetween(start: Date, end: Date): number {
   const startDate = new Date(start);

@@ -12,30 +12,30 @@ import { ObjectId } from "mongodb";
 @Entity("roles")
 export class Role {
     @ObjectIdColumn()
-    _id: ObjectId;
+    _id!: ObjectId;
 
     @Index({ unique: true })
     @Column()
-    name: string;
+    name!: string;
 
     @Index({ unique: true })
     @Column()
-    code: string;
+    code!: string;
 
     @Column({ default: 1 })
-    isActive: number;
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number;
+    isDelete!: number;
 
     @Column({ default: false })
-    showForAdmin: boolean;
+    showForAdmin!: boolean;
 
     @Column({ default: false })
-    mobileAdminAccess: boolean;
+    mobileAdminAccess!: boolean;
 
     @Column("json")
-    permissions: {
+    permissions!: {
         moduleId: ObjectId;
         actions: {
             view: boolean;
@@ -46,14 +46,14 @@ export class Role {
     }[];
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    updatedAt!: Date;
 
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 }

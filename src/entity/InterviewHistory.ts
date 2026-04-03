@@ -5,29 +5,29 @@ import { ObjectId } from "mongodb";
 export class InterviewHistory {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId;
 
     @Column()
-    interviewId: ObjectId
+    interviewId!: ObjectId;
 
     @Column()
-    status: string
+    status!: string;
 
     @Column({ nullable: true })
-    interviewStatus: string
+    interviewStatus?: string;
 
     @Column({ nullable: true })
-    feedback: string
+    feedback?: string;
 
     @Column({ nullable: true })
-    interviewResult: string
+    interviewResult?: string;
 
     @Column({ nullable: true })
-    reason: string
+    reason?: string;
 
     @Column()
-    updatedBy: ObjectId
+    updatedBy!: ObjectId;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 }

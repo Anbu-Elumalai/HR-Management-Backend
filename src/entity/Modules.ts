@@ -9,29 +9,29 @@ import { ObjectId } from "mongodb";
 @Entity('modules')
 export class Modules {
     @ObjectIdColumn()
-    _id: ObjectId;
+    _id!: ObjectId;
 
     @Column()
-    key: string;
+    key!: string;
 
     @Column()
-    name: string;
+    name!: string;
 
     @Column()
-    group: string;
+    group!: string;
 
     @Column()
-    sortOrder: number;
+    sortOrder!: number;
 
     @Column()
-    isActive: number;
+    isActive!: number;
 
     @Column()
-    isDelete: number;
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    updatedAt!: Date;
 }

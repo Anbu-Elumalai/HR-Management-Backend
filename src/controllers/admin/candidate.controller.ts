@@ -18,6 +18,7 @@ import { ObjectId } from "mongodb";
 import { AuthMiddleware, AuthPayload } from "../../middlewares/AuthMiddleware";
 import { AppDataSource } from "../../data-source";
 import { Candidate } from "../../entity/Candidate";
+import { Vacancy } from "../../entity/Vacancy";
 import { CreateCandidateDto, UpdateCandidateDto } from "../../dto/admin/Candidate.dto";
 import { handleErrorResponse, pagination, response } from "../../utils";
 import { generateCandidateCode } from "../../utils/id.generator";
@@ -31,6 +32,7 @@ interface RequestWithUser extends Request {
 @UseBefore(AuthMiddleware)
 export class CandidateController {
     private candidateRepo = AppDataSource.getMongoRepository(Candidate);
+    private vacancyRepo = AppDataSource.getMongoRepository(Vacancy);
 
     @Post("/")
     @HttpCode(StatusCodes.CREATED)
@@ -41,6 +43,29 @@ export class CandidateController {
     ) {
         try {
             const { userId } = req.user;
+
+            // Validate vacancy exists and is in acceptable status before creating candidate
+            const vacancyRepo = AppDataSource.getMongoRepository(Vacancy);
+            const vacancy = await vacancyRepo.findOne({
+                where: { _id: new ObjectId(body.vacancyId), isDelete: 0 },
+                select: ['_id', 'status', 'numberOfVacancy', 'filledCount']
+            });
+
+            if (!vacancy) {
+                return response(res, StatusCodes.BAD_REQUEST, "Invalid vacancyId - vacancy not found");
+            }
+
+            // Business rule: candidates can only be added to draft or open vacancies
+            if (!['draft', 'open'].includes(vacancy.status)) {
+                return response(res, StatusCodes.BAD_REQUEST,
+                    `Cannot add candidates to vacancy with status '${vacancy.status}'. Only draft or open vacancies accept applications.`);
+            }
+
+            // Optional: Check if vacancy is already full
+            if (vacancy.filledCount >= vacancy.numberOfVacancy) {
+                // Could be a warning or reject based on business rule
+                console.log(`Warning: Vacancy ${vacancy._id} has reached capacity (${vacancy.filledCount}/${vacancy.numberOfVacancy})`);
+            }
 
             const candidate = new Candidate();
             candidate.candidateCode = await generateCandidateCode();
@@ -77,6 +102,13 @@ export class CandidateController {
             candidate.isDelete = 0;
 
             const savedCandidate = await this.candidateRepo.save(candidate);
+
+            // Increment applicantCount on vacancy
+            await vacancyRepo.createQueryBuilder()
+                .update()
+                .inc('applicantCount', 1)
+                .where('_id', vacancy._id)
+                .execute();
 
             return response(res, StatusCodes.CREATED, "Candidate created successfully", savedCandidate);
         } catch (error) {
@@ -277,6 +309,9 @@ export class CandidateController {
                 return response(res, StatusCodes.NOT_FOUND, "Candidate not found");
             }
 
+            const oldStatus = candidate.status;
+            const oldVacancyId = candidate.vacancyId.toString();
+
             if (body.name) candidate.name = body.name;
             if (body.email) candidate.email = body.email;
             if (body.phone) candidate.phone = body.phone;
@@ -313,6 +348,43 @@ export class CandidateController {
 
             const result = await this.candidateRepo.save(candidate);
 
+            // Track filled count: if status changed to 'hired', increment vacancy filledCount
+            // If changed from 'hired' to something else, decrement
+            if (body.status && oldStatus !== body.status) {
+                const vacancyId = candidate.vacancyId.toString();
+
+                if (body.status === 'hired' && oldStatus !== 'hired') {
+                    await this.vacancyRepo.createQueryBuilder()
+                        .update()
+                        .inc('filledCount', 1)
+                        .where('_id', vacancyId)
+                        .execute();
+                } else if (oldStatus === 'hired' && body.status !== 'hired') {
+                    await this.vacancyRepo.createQueryBuilder()
+                        .update()
+                        .inc('filledCount', -1)
+                        .where('_id', vacancyId)
+                        .execute();
+                }
+            }
+
+            // If vacancyId changed, update counts on both old and new vacancies
+            if (body.vacancyId && oldVacancyId !== body.vacancyId.toString()) {
+                // Decrement applicantCount on old vacancy (but keep filledCount unchanged as candidate moved)
+                await this.vacancyRepo.createQueryBuilder()
+                    .update()
+                    .inc('applicantCount', -1)
+                    .where('_id', oldVacancyId)
+                    .execute();
+
+                // Increment applicantCount on new vacancy
+                await this.vacancyRepo.createQueryBuilder()
+                    .update()
+                    .inc('applicantCount', 1)
+                    .where('_id', candidate.vacancyId)
+                    .execute();
+            }
+
             return response(res, StatusCodes.OK, "Candidate updated successfully", result);
         } catch (error) {
             return handleErrorResponse(error, res);
@@ -330,11 +402,31 @@ export class CandidateController {
                 return response(res, StatusCodes.NOT_FOUND, "Candidate not found");
             }
 
+            // Track vacancy and status for counter updates
+            const vacancyId = candidate.vacancyId.toString();
+            const wasHired = candidate.status === 'hired';
+
             candidate.isDelete = 1;
-            // Optionally set active to 0 as well
             candidate.isActive = 0;
-            
+
             await this.candidateRepo.save(candidate);
+
+            // Decrement applicantCount on vacancy
+            await this.vacancyRepo.createQueryBuilder()
+                .update()
+                .inc('applicantCount', -1)
+                .where('_id', vacancyId)
+                .execute();
+
+            // If candidate was hired, also decrement filledCount
+            if (wasHired) {
+                await this.vacancyRepo.createQueryBuilder()
+                    .update()
+                    .inc('filledCount', -1)
+                    .where('_id', vacancyId)
+                    .execute();
+            }
+
             return response(res, StatusCodes.OK, "Candidate deleted successfully");
         } catch (error) {
             return handleErrorResponse(error, res);

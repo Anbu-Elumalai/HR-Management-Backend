@@ -5,85 +5,85 @@ import { ObjectId } from "mongodb";
 export class Candidate {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId;
 
     @Column()
-    candidateCode: string
+    candidateCode!: string;
 
     @Column()
-    name: string
+    name!: string;
 
     @Column()
-    email: string
+    email!: string;
 
     @Column()
-    phone: string
+    phone!: string;
 
     @Column()
-    role: string
+    role!: string;
 
     @Column()
-    vacancyId: ObjectId
+    vacancyId!: ObjectId;
 
     @Column()
-    departmentId: ObjectId
+    departmentId!: ObjectId;
 
     @Column()
-    experience: string
+    experience!: string;
 
     @Column()
-    noticePeriod: string
+    noticePeriod!: string;
 
     @Column({ default: 'New' })
-    status: string
+    status!: string;
 
     @Column()
-    source: string
+    source!: string;
 
     @Column()
-    currentCompany: string
+    currentCompany!: string;
 
     @Column()
-    currentLocation: ObjectId
+    currentLocation!: ObjectId;
 
     @Column()
-    currentCTC: string
+    currentCTC!: string;
 
     @Column()
-    expectedCTC: string
+    expectedCTC!: string;
 
     @Column({ nullable: true })
-    skills: ObjectId[]
+    skills?: ObjectId[];
 
     @Column({ nullable: true })
-    remarks: string
+    remarks?: string;
 
     @Column({ nullable: true })
-    linkedinUrl: string
+    linkedinUrl?: string;
 
     @Column({ nullable: true })
-    portfolioUrl: string
+    portfolioUrl?: string;
 
     @Column({ nullable: true })
-    githubUrl: string
+    githubUrl?: string;
 
     @Column()
-    highestQualification: string
+    highestQualification!: string;
 
     @Column({ nullable: true })
-    preferredLocation: ObjectId[]
+    preferredLocation?: ObjectId[];
 
     @Column()
-    availableToJoin: Date
+    availableToJoin!: Date;
 
     @Column()
-    dob: Date
+    dob!: Date;
 
     @Column()
-    gender: string
+    gender!: string;
 
     @Column()
-    address: string
+    address!: string;
 
     @Column("simple-json", { nullable: true })
     resumeFile?: {
@@ -95,20 +95,20 @@ export class Candidate {
     };
 
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 
     @Column({ default: 1 })
-    isActive: number
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date
+    updatedAt!: Date;
 }

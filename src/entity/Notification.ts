@@ -10,44 +10,44 @@ import { ObjectId } from "mongodb";
 @Entity("notifications")
 export class Notifications {
     @ObjectIdColumn()
-    _id: ObjectId;
+    _id!: ObjectId;
 
     @Column()
-    moduleName: string;
+    moduleName!: string;
 
     @Column()
-    content: string;
+    content!: string;
 
     @Column()
-    subject: string;
+    subject!: string;
 
     @Column()
-    moduleId: ObjectId;
+    moduleId!: ObjectId;
 
     @Column()
-    receiverId: ObjectId;
+    receiverId!: ObjectId;
 
     @Column({ nullable: true })
     actionType?: "REQUEST" | "APPROVE" | "DECLINE";
     // 🔹 Audit
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 
     @Column({ default: 1 })
-    isActive: number;
+    isActive!: number;
 
     @Column({ default: false })
-    isRead: boolean;
+    isRead!: boolean;
 
     @Column({ default: 0 })
-    isDelete: number;
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    updatedAt!: Date;
 }

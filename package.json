@@ -4,7 +4,9 @@
   "description": "HR Management Backend project developed with TypeORM.",
   "type": "commonjs",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
+    "@types/express-fileupload": "^1.5.1",
     "@types/json2csv": "^5.0.7",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",

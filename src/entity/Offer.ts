@@ -5,78 +5,78 @@ import { ObjectId } from "mongodb";
 export class Offer {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId;
 
     @Column()
-    offerCode: string
+    offerCode!: string;
 
     @Column()
-    candidateId: ObjectId
+    candidateId!: ObjectId;
 
     @Column()
-    vacancyId: ObjectId
+    vacancyId!: ObjectId;
 
     @Column()
-    departmentId: ObjectId
+    departmentId!: ObjectId;
 
     @Column()
-    reportingManager: ObjectId
+    reportingManager!: ObjectId;
 
     @Column()
-    workLocationId: ObjectId
+    workLocationId!: ObjectId;
 
     @Column()
-    workMode: string
+    workMode!: string;
 
     @Column()
-    joiningDate: Date
+    joiningDate!: Date;
 
     @Column()
-    offerExpiryDate: Date
+    offerExpiryDate!: Date;
 
     @Column()
-    ctc: number
+    ctc!: number;
 
     @Column({ default: 'Pending Approval' })
-    status: string
+    status!: string;
 
     @Column({ default: 'Pending' })
-    candidateResponse: string
+    candidateResponse!: string;
 
     @Column({ nullable: true })
-    termsAndConditions: string
+    termsAndConditions?: string;
 
     @Column({ nullable: true })
-    notes: string
+    notes?: string;
 
     @Column("simple-json")
-    salaryBreakdown: {
+    salaryBreakdown!: {
         basic: number;
         hra: number;
         specialAllowance: number;
         pf: number;
         gratuity: number;
         medicalInsurance: number;
-    }
+    };
 
     @Column({ nullable: true })
-    offerLetterUrl: string
+    offerLetterUrl?: string;
 
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 
     @Column({ default: 1 })
-    isActive: number
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date
+    updatedAt!: Date;
 }

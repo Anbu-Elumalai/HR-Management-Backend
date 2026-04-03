@@ -5,93 +5,93 @@ import { ObjectId } from "mongodb";
 export class Interview {
 
     @ObjectIdColumn()
-    id: ObjectId
+    id!: ObjectId
 
     @Column()
-    interviewCode: string
+    interviewCode!: string
 
     @Column()
-    candidateId: ObjectId
+    candidateId!: ObjectId
 
     @Column()
-    vacancyId: ObjectId
+    vacancyId!: ObjectId
 
     @Column()
-    roundId: ObjectId
+    roundId!: ObjectId
 
     @Column({ default: 1 })
-    roundNumber: number
+    roundNumber!: number
 
     @Column()
-    level: string
+    level!: string
 
     @Column()
-    type: string
+    type!: string
 
     @Column({ nullable: true })
-    mode: string
+    mode?: string
 
     @Column()
-    scheduleDate: Date
+    scheduleDate!: Date
 
     @Column()
-    time: string
+    time!: string
 
     @Column()
-    duration: number
+    duration!: number
 
     @Column({ default: 'Scheduled' })
-    status: string
+    status!: string
 
     @Column()
-    email: string
+    email!: string
 
     @Column()
-    phone: string
+    phone!: string
 
     @Column()
-    timezone: string
+    timezone!: string
 
     @Column()
-    platform: string
+    platform!: string
 
     @Column({ nullable: true })
-    location: string
+    location?: string
 
     @Column({ nullable: true })
-    notes: string
+    notes?: string
 
     @Column({ nullable: true })
-    candidateInstructions: string
+    candidateInstructions?: string
 
     @Column({ nullable: true })
-    feedback: string
+    feedback?: string
 
     @Column({ nullable: true })
-    interviewResult: string
+    interviewResult?: string
 
     @Column("simple-json", { nullable: true })
-    panelMembers: {
+    panelMembers?: {
         interviewerType: string;
         employeeId: ObjectId;
         panelRole?: string;
     }[];
 
     @Column()
-    createdBy: ObjectId;
+    createdBy!: ObjectId;
 
     @Column()
-    updatedBy: ObjectId;
+    updatedBy!: ObjectId;
 
     @Column({ default: 1 })
-    isActive: number
+    isActive!: number;
 
     @Column({ default: 0 })
-    isDelete: number
+    isDelete!: number;
 
     @CreateDateColumn()
-    createdAt: Date
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date
+    updatedAt!: Date;
 }

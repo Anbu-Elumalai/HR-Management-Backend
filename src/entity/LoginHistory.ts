@@ -11,38 +11,38 @@ import { ObjectId } from "mongodb";
 export class LoginHistory {
 
   @ObjectIdColumn()
-  id: ObjectId;
+  id!: ObjectId;
 
   @Column()
-  userId: ObjectId;
+  userId!: ObjectId;
 
   @Column()
-  userType: "ADMIN" | "ADMIN_USER" |"MEMBER" | "GUEST";
+  userType!: "ADMIN" | "ADMIN_USER" |"MEMBER" | "GUEST";
 
   @Column()
-  userName: string;
+  userName!: string;
 
   @Column()
-  phoneNumber: string;
+  phoneNumber!: string;
 
   @Column()
-  deviceName: string;
+  deviceName!: string;
 
   @Column()
-  browserName: string;
+  browserName!: string;
 
   @Column()
-  currentLocation: string;
+  currentLocation!: string;
 
   @Column()
-  ipAddress: string;
+  ipAddress!: string;
 
   @Column()
-  loginfrom:"WEB" | "MOBILE";
+  loginfrom!: "WEB" | "MOBILE";
 
   @Column()
-  status: "SUCCESS" | "FAILED";
+  status!: "SUCCESS" | "FAILED";
 
   @CreateDateColumn()
-  loginAt: Date;
+  loginAt!: Date;
 }

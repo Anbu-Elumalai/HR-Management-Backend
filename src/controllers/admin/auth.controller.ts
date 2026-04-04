@@ -72,8 +72,6 @@ export class AuthController {
                 (await this.adminUserRepo.findOne({
                     where: { phoneNumber, isDelete: 0 }
                 }));
-            console.log(admin, 'adminadminadminadminadminadminadminadminadminadminadminadmin');
-
 
             if (!admin) {
                 return response(res, StatusCodes.UNAUTHORIZED, "Invalid mobile number");
@@ -130,7 +128,6 @@ export class AuthController {
                 : "Unknown";
 
             let payload: any;
-            console.log(admin, '1111111111111111');
 
             payload = {
                 id: admin.id.toString(),

@@ -95,7 +95,7 @@ export class CreateVacancyDto {
 
     @IsString()
     @IsOptional()
-    @IsIn(['draft', 'open', 'closed', 'filled', 'cancelled'])
+    @IsIn(['draft', 'open', 'closed', 'filled', 'cancelled', 'scheduled'])
     status?: string;
 
     @IsString()
@@ -250,7 +250,7 @@ export class UpdateVacancyDto {
 
     @IsString()
     @IsOptional()
-    @IsIn(['draft', 'open', 'closed', 'filled', 'cancelled'])
+    @IsIn(['draft', 'open', 'closed', 'filled', 'cancelled', "scheduled"])
     status?: string;
 
     @IsString()

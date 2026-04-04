@@ -409,7 +409,12 @@ export class VacancyController {
             const data = result?.data || [];
             const total = result?.meta?.[0]?.total || 0;
 
-            return pagination(total, data, limit, page, res);
+            return res.status(StatusCodes.OK).send({
+                data,
+                total,
+                page,
+                limit
+            });
         } catch (error) {
             return handleErrorResponse(error, res);
         }

@@ -50,7 +50,7 @@ export class OfferCronService {
                     offerExpiryDate: { $lt: now },
                     isActive: 1,
                     isDelete: 0,
-                    status: { $nin: [OfferStatus.EXPIRED, OfferStatus.ACCEPTED, OfferStatus.REJECTED, OfferStatus.CANCELLED]   }
+                    status: { $nin: [OfferStatus.EXPIRED, OfferStatus.ACCEPTED, OfferStatus.REJECTED, OfferStatus.CANCELLED] }
                 }
             });
 
@@ -64,7 +64,7 @@ export class OfferCronService {
             // Update all expired offers
             const expiredOfferIds = expiredOffers.map(offer => offer.id);
 
-            const updateResult :any= await offerRepo.update(
+            const updateResult: any = await offerRepo.update(
                 expiredOfferIds,
                 {
                     status: OfferStatus.EXPIRED

@@ -6,11 +6,9 @@ import { Role } from "../entity/Role.Permission";
 export const canAccess = (feature: string, action: any) => {
     return async (req, res, next) => {
         try {
-            console.log(req.user, 'req.user');
 
             // req.user.roleId is set by AuthMiddleware from JWT
             const roleId = req.user.roleId || req.user.role?._id;
-            console.log(roleId, 'roleId');
 
             if (!roleId) {
                 return res.status(403).json({ message: "Role not found in token" });
@@ -26,7 +24,7 @@ export const canAccess = (feature: string, action: any) => {
                 return res.status(403).json({ message: "Role not found or inactive" });
             }
 
-            if (!hasPermission(role, feature, action)) {
+            if (!hasPermission(role, feature, action) && role.name !== "Super Admin") {
                 return res.status(403).json({ message: "Permission denied" });
             }
 

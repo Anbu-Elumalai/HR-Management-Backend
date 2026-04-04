@@ -8,6 +8,9 @@ export class Interview {
     id!: ObjectId
 
     @Column()
+    companyId!: ObjectId
+
+    @Column()
     interviewCode!: string
 
     @Column()

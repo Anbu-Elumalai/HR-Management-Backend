@@ -18,7 +18,7 @@ import geoip from "geoip-lite";
 import { UAParser } from "ua-parser-js";
 
 import { AppDataSource } from "../../data-source";
-import { Admin } from "../../entity/Admin";
+// import { Admin } from "../../entity/Admin";
 import { AdminUser } from "../../entity/AdminUser";
 import { LoginHistory } from "../../entity/LoginHistory";
 import response from "../../utils/response";
@@ -37,7 +37,7 @@ interface RequestWithUser extends Request {
 @JsonController("/auth")
 export class AuthController {
 
-    private adminRepo = AppDataSource.getMongoRepository(Admin);
+    // private adminRepo = AppDataSource.getMongoRepository(Admin);
     private adminUserRepo = AppDataSource.getMongoRepository(AdminUser);
     private loginHistoryRepo =
         AppDataSource.getMongoRepository(LoginHistory);
@@ -68,12 +68,12 @@ export class AuthController {
             }
 
             const admin =
-                (await this.adminRepo.findOne({
-                    where: { phoneNumber, isDelete: 0 }
-                })) ||
+
                 (await this.adminUserRepo.findOne({
                     where: { phoneNumber, isDelete: 0 }
                 }));
+            console.log(admin, 'adminadminadminadminadminadminadminadminadminadminadminadmin');
+
 
             if (!admin) {
                 return response(res, StatusCodes.UNAUTHORIZED, "Invalid mobile number");
@@ -130,22 +130,15 @@ export class AuthController {
                 : "Unknown";
 
             let payload: any;
+            console.log(admin, '1111111111111111');
 
-            if (admin instanceof Admin) {
-                payload = {
-                    id: admin.id.toString(),
-                    phoneNumber: admin.phoneNumber,
-                    role: admin.role,
-                    userType: "ADMIN"
-                };
-            } else {
-                payload = {
-                    id: admin.id.toString(),
-                    phoneNumber: admin.phoneNumber,
-                    roleId: admin.roleId.toString(),
-                    userType: "ADMIN_USER"
-                };
-            }
+            payload = {
+                id: admin.id.toString(),
+                companyId: admin.companyId?.toString(),
+                phoneNumber: admin.phoneNumber,
+                roleId: admin.roleId?.toString(),
+                userType: "ADMIN_USER"
+            };
 
             await this.loginHistoryRepo.save({
                 userId: admin.id,
@@ -205,113 +198,86 @@ export class AuthController {
 
             let data: any[] = [];
 
-            if (userType === "ADMIN") {
-                data = await this.adminRepo.aggregate([
-                    {
-                        $match: {
-                            _id: new ObjectId(userId),
-                            isActive: 1,
-                            isDelete: 0
-                        }
-                    },
-                    {
-                        $project: {
-                            _id: 1,
-                            name: 1,
-                            phoneNumber: 1,
-                            email: 1,
-                            userType: { $literal: "ADMIN" },
-                            role: { $literal: null },
-                            permissions: { $literal: [] }
-                        }
+            data = await this.adminUserRepo.aggregate([
+                {
+                    $match: {
+                        _id: new ObjectId(userId),
+                        isActive: 1,
+                        isDelete: 0
                     }
-                ]).toArray();
+                },
 
-            }
-            else {
+                {
+                    $lookup: {
+                        from: "roles",
+                        localField: "roleId",
+                        foreignField: "_id",
+                        as: "role"
+                    }
+                },
+                { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "modules",
+                        localField: "role.permissions.moduleId",
+                        foreignField: "_id",
+                        as: "modules"
+                    }
+                },
 
-                data = await this.adminUserRepo.aggregate([
-                    {
-                        $match: {
-                            _id: new ObjectId(userId),
-                            isActive: 1,
-                            isDelete: 0
-                        }
-                    },
-
-                    {
-                        $lookup: {
-                            from: "roles",
-                            localField: "roleId",
-                            foreignField: "_id",
-                            as: "role"
-                        }
-                    },
-                    { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
-                    {
-                        $lookup: {
-                            from: "modules",
-                            localField: "role.permissions.moduleId",
-                            foreignField: "_id",
-                            as: "modules"
-                        }
-                    },
-
-                    {
-                        $addFields: {
-                            permissions: {
-                                $map: {
-                                    input: "$role.permissions",
-                                    as: "perm",
-                                    in: {
-                                        moduleId: "$$perm.moduleId",
-                                        moduleName: {
-                                            $let: {
-                                                vars: {
-                                                    module: {
-                                                        $arrayElemAt: [
-                                                            {
-                                                                $filter: {
-                                                                    input: "$modules",
-                                                                    as: "m",
-                                                                    cond: {
-                                                                        $eq: ["$$m._id", "$$perm.moduleId"]
-                                                                    }
+                {
+                    $addFields: {
+                        permissions: {
+                            $map: {
+                                input: "$role.permissions",
+                                as: "perm",
+                                in: {
+                                    moduleId: "$$perm.moduleId",
+                                    moduleName: {
+                                        $let: {
+                                            vars: {
+                                                module: {
+                                                    $arrayElemAt: [
+                                                        {
+                                                            $filter: {
+                                                                input: "$modules",
+                                                                as: "m",
+                                                                cond: {
+                                                                    $eq: ["$$m._id", "$$perm.moduleId"]
                                                                 }
-                                                            },
-                                                            0
-                                                        ]
-                                                    }
-                                                },
-                                                in: "$$module.name"
-                                            }
-                                        },
-                                        actions: "$$perm.actions"
-                                    }
+                                                            }
+                                                        },
+                                                        0
+                                                    ]
+                                                }
+                                            },
+                                            in: "$$module.name"
+                                        }
+                                    },
+                                    actions: "$$perm.actions"
                                 }
                             }
                         }
-                    },
-                    {
-                        $project: {
-                            _id: 1,
-                            name: 1,
-                            phoneNumber: 1,
-                            email: 1,
-                            userType: { $literal: "ADMIN_USER" },
-
-                            role: {
-                                id: "$role._id",
-                                name: "$role.name",
-                                code: "$role.code"
-                            },
-
-                            permissions: 1
-                        }
                     }
-                ]).toArray();
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        phoneNumber: 1,
+                        email: 1,
+                        userType: { $literal: "ADMIN_USER" },
 
-            }
+                        role: {
+                            id: "$role._id",
+                            name: "$role.name",
+                            code: "$role.code"
+                        },
+
+                        permissions: 1
+                    }
+                }
+            ]).toArray();
 
             if (!data.length) {
                 return response(res, StatusCodes.NOT_FOUND, "User not found");

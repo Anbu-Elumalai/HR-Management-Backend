@@ -8,6 +8,9 @@ export class Offer {
     id!: ObjectId;
 
     @Column()
+    companyId!: ObjectId;
+
+    @Column()
     offerCode!: string;
 
     @Column()

@@ -27,6 +27,7 @@ import { EmploymentType } from "../../entity/EmploymentType";
 import { AdminUser } from "../../entity/AdminUser";
 import { Project } from "../../entity/Project";
 import { ReasonRequisition } from "../../entity/ReasonRequisition";
+import { Role } from "../../entity/Role.Permission";
 import {
     CreateVacancyDto,
     UpdateVacancyDto,
@@ -448,7 +449,7 @@ export class VacancyController {
 
             const isOwner = vacancy.createdBy?.toString() === userId;
             const isHiringManager = vacancy.reportingToId?.toString() === userId;
-            const userRole:any = req.user.role;
+            const userRole = req.user.role as Role;
             const isAdmin = userRole?.permissions?.some((p: any) => p.actions?.edit) || false;
 
             if (!isOwner && !isHiringManager && !isAdmin) {
@@ -654,7 +655,7 @@ export class VacancyController {
 
             const isOwner = vacancy.createdBy?.toString() === userId;
             const isHiringManager = vacancy.reportingToId?.toString() === userId;
-            const userRole = req.user.role;
+            const userRole = req.user.role as Role;
             const isAdmin = userRole?.permissions?.some((p: any) => p.actions?.edit) || false;
 
             if (!isOwner && !isHiringManager && !isAdmin) {
@@ -781,7 +782,7 @@ export class VacancyController {
 
             const isOwner = vacancy.createdBy?.toString() === userId;
             const isHiringManager = vacancy.reportingToId?.toString() === userId;
-            const userRole = req.user.role;
+            const userRole = req.user.role as Role;
             const isAdmin = userRole?.permissions?.some((p: any) => p.actions?.delete) || false;
 
             if (!isOwner && !isHiringManager && !isAdmin) {

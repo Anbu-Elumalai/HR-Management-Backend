@@ -26,11 +26,14 @@ export interface ILocation {
 }
 
 @Entity("attendance")
+export class Attendance {
 @Index(["memberId", "sourceId", "sourceType"], { unique: true })
 @Index(["sourceId"])
 @Index(["memberId"])
 @Index(["sourceType"])
-export class Attendance {
+
+
+    @Column() companyId!: ObjectId;
 
   @ObjectIdColumn()
   _id!: ObjectId;

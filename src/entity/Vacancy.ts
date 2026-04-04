@@ -8,6 +8,10 @@ export class Vacancy {
     @ObjectIdColumn()
     id!: ObjectId;
 
+    @Column()
+    @Index()
+    companyId!: ObjectId;
+
     @Index(["departmentId", "status"])
     @Index(["positionId", "status"])
     @Index(["recruiterId", "status"])

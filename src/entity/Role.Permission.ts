@@ -11,6 +11,9 @@ import { ObjectId } from "mongodb";
 
 @Entity("roles")
 export class Role {
+
+
+    @Column() companyId!: ObjectId;
     @ObjectIdColumn()
     _id!: ObjectId;
 

@@ -8,6 +8,9 @@ import {
 import { ObjectId } from "mongodb";
 @Entity('modules')
 export class Modules {
+
+
+    @Column() companyId!: ObjectId;
     @ObjectIdColumn()
     _id!: ObjectId;
 

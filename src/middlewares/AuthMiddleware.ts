@@ -6,7 +6,6 @@ import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "../config/jwt";
 import { AppDataSource } from "../data-source";
-import { Admin } from "../entity/Admin";
 import { AdminUser } from "../entity/AdminUser";
 import { ObjectId } from "mongodb";
 import { UserToken } from "../entity/UserToken";
@@ -16,7 +15,8 @@ import { handleErrorResponse } from "../utils";
 
 export interface AuthPayload {
     userId: string;
-    role?: string;
+    companyId: string;
+    role?: string | Role;
     roleId?: string;
     userType?: "ADMIN" | "ADMIN_USER" | "MEMBER";
 }
@@ -50,17 +50,10 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
             const userType = decoded.userType;
             let user: any = null;
 
-            if (userType === "ADMIN") {
-                user = await AppDataSource.getMongoRepository(Admin).findOneBy({
-                    _id: new ObjectId(userId),
-                    isDelete: 0
-                });
-            } else if (userType === "ADMIN_USER") {
-                user = await AppDataSource.getMongoRepository(AdminUser).findOneBy({
-                    _id: new ObjectId(userId),
-                    isDelete: 0
-                });
-            }
+            user = await AppDataSource.getMongoRepository(AdminUser).findOneBy({
+                _id: new ObjectId(userId),
+                isDelete: 0
+            });
 
             if (!user) {
                 throw new UnauthorizedError("User not found or account deleted");
@@ -91,6 +84,7 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
             (req as any).user = {
                 ...decoded,
                 userId: decoded.id,
+                companyId: user.companyId?.toString() || decoded.companyId,
                 roleId: user.roleId?.toString() || decoded.roleId,
                 role: role // attach full role object with permissions
             };

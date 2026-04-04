@@ -10,6 +10,9 @@ import { ObjectId } from "mongodb";
 @Entity("loginhistories")
 export class LoginHistory {
 
+
+    @Column() companyId!: ObjectId;
+
   @ObjectIdColumn()
   id!: ObjectId;
 

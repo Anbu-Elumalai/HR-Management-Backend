@@ -4,6 +4,9 @@ import { ObjectId } from "mongodb";
 @Entity("interview_rounds")
 export class InterviewRound {
 
+
+    @Column() companyId!: ObjectId;
+
     @ObjectIdColumn()
     id!: ObjectId;
 

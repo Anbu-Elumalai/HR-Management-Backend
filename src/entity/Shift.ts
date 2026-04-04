@@ -4,6 +4,9 @@ import { ObjectId } from "mongodb";
 @Entity("shifts")
 export class Shift {
 
+
+    @Column() companyId!: ObjectId;
+
     @ObjectIdColumn()
     id!: ObjectId;
 

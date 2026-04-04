@@ -48,7 +48,7 @@ export class CandidateController {
             const vacancyRepo = AppDataSource.getMongoRepository(Vacancy);
             const vacancy = await vacancyRepo.findOne({
                 where: { _id: new ObjectId(body.vacancyId), isDelete: 0 },
-                select: ['_id', 'status', 'numberOfVacancy', 'filledCount']
+                select: ['id' as any, 'status', 'numberOfVacancy', 'filledCount']
             });
 
             if (!vacancy) {
@@ -64,7 +64,7 @@ export class CandidateController {
             // Optional: Check if vacancy is already full
             if (vacancy.filledCount >= vacancy.numberOfVacancy) {
                 // Could be a warning or reject based on business rule
-                console.log(`Warning: Vacancy ${vacancy._id} has reached capacity (${vacancy.filledCount}/${vacancy.numberOfVacancy})`);
+                console.log(`Warning: Vacancy ${vacancy.id} has reached capacity (${vacancy.filledCount}/${vacancy.numberOfVacancy})`);
             }
 
             const candidate = new Candidate();
@@ -104,11 +104,10 @@ export class CandidateController {
             const savedCandidate = await this.candidateRepo.save(candidate);
 
             // Increment applicantCount on vacancy
-            await vacancyRepo.createQueryBuilder()
-                .update()
-                .inc('applicantCount', 1)
-                .where('_id', vacancy._id)
-                .execute();
+            await this.vacancyRepo.updateOne(
+                { _id: vacancy.id },
+                { $inc: { applicantCount: 1 } }
+            );
 
             return response(res, StatusCodes.CREATED, "Candidate created successfully", savedCandidate);
         } catch (error) {
@@ -354,35 +353,31 @@ export class CandidateController {
                 const vacancyId = candidate.vacancyId.toString();
 
                 if (body.status === 'hired' && oldStatus !== 'hired') {
-                    await this.vacancyRepo.createQueryBuilder()
-                        .update()
-                        .inc('filledCount', 1)
-                        .where('_id', vacancyId)
-                        .execute();
+                    await this.vacancyRepo.updateOne(
+                        { _id: new ObjectId(vacancyId) },
+                        { $inc: { filledCount: 1 } }
+                    );
                 } else if (oldStatus === 'hired' && body.status !== 'hired') {
-                    await this.vacancyRepo.createQueryBuilder()
-                        .update()
-                        .inc('filledCount', -1)
-                        .where('_id', vacancyId)
-                        .execute();
+                    await this.vacancyRepo.updateOne(
+                        { _id: new ObjectId(vacancyId) },
+                        { $inc: { filledCount: -1 } }
+                    );
                 }
             }
 
             // If vacancyId changed, update counts on both old and new vacancies
             if (body.vacancyId && oldVacancyId !== body.vacancyId.toString()) {
                 // Decrement applicantCount on old vacancy (but keep filledCount unchanged as candidate moved)
-                await this.vacancyRepo.createQueryBuilder()
-                    .update()
-                    .inc('applicantCount', -1)
-                    .where('_id', oldVacancyId)
-                    .execute();
+                await this.vacancyRepo.updateOne(
+                    { _id: new ObjectId(oldVacancyId) },
+                    { $inc: { applicantCount: -1 } }
+                );
 
                 // Increment applicantCount on new vacancy
-                await this.vacancyRepo.createQueryBuilder()
-                    .update()
-                    .inc('applicantCount', 1)
-                    .where('_id', candidate.vacancyId)
-                    .execute();
+                await this.vacancyRepo.updateOne(
+                    { _id: new ObjectId(candidate.vacancyId) },
+                    { $inc: { applicantCount: 1 } }
+                );
             }
 
             return response(res, StatusCodes.OK, "Candidate updated successfully", result);
@@ -412,19 +407,17 @@ export class CandidateController {
             await this.candidateRepo.save(candidate);
 
             // Decrement applicantCount on vacancy
-            await this.vacancyRepo.createQueryBuilder()
-                .update()
-                .inc('applicantCount', -1)
-                .where('_id', vacancyId)
-                .execute();
+            await this.vacancyRepo.updateOne(
+                { _id: new ObjectId(vacancyId) },
+                { $inc: { applicantCount: -1 } }
+            );
 
             // If candidate was hired, also decrement filledCount
             if (wasHired) {
-                await this.vacancyRepo.createQueryBuilder()
-                    .update()
-                    .inc('filledCount', -1)
-                    .where('_id', vacancyId)
-                    .execute();
+                await this.vacancyRepo.updateOne(
+                    { _id: new ObjectId(vacancyId) },
+                    { $inc: { filledCount: -1 } }
+                );
             }
 
             return response(res, StatusCodes.OK, "Candidate deleted successfully");

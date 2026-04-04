@@ -75,9 +75,7 @@ export class CreateVacancyDto {
     salaryRangeTo: number | undefined;
 
     // Cross-field validation: salaryRangeFrom <= salaryRangeTo
-    @Validate(Validator.custom(({ salaryRangeFrom, salaryRangeTo }) => {
-        return salaryRangeFrom <= salaryRangeTo;
-    }, { message: 'salaryRangeFrom must be less than or equal to salaryRangeTo' }))
+
 
     @IsOptional()
     file?: {
@@ -106,17 +104,7 @@ export class CreateVacancyDto {
     approvalStatus?: string;
 
     // Date validations
-    @Validate(Validator.custom(({ requisitionDate, requiredDate }) => {
-        const req = new Date(requisitionDate);
-        const reqd = new Date(requiredDate);
-        return req <= reqd;
-    }, { message: 'requisitionDate must be before or equal to requiredDate' }))
-    @Validate(Validator.custom(({ requiredDate }) => {
-        const reqd = new Date(requiredDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return reqd >= today;
-    }, { message: 'requiredDate must be today or a future date' }))
+
 
     @IsOptional()
     @IsString()
@@ -137,7 +125,7 @@ export class CreateVacancyDto {
 
     @IsOptional()
     @IsIn(['low', 'medium', 'high', 'urgent'])
-    priority?: string | undefined;
+    priority?: "low" | "medium" | "high" | "urgent";
 
     @IsOptional()
     @IsNumber()
@@ -149,16 +137,11 @@ export class CreateVacancyDto {
     @Min(0)
     experienceMax?: number;
 
-    @Validate(Validator.custom(({ experienceMin, experienceMax }) => {
-        if (experienceMin !== undefined && experienceMax !== undefined) {
-            return experienceMin <= experienceMax;
-        }
-        return true;
-    }, { message: 'experienceMin must be less than or equal to experienceMax' }))
+
 
     @IsOptional()
     @IsIn(['onsite', 'hybrid', 'remote', 'flexible'])
-    workLocationType?: string;
+    workLocationType?: "onsite" | "hybrid" | "remote" | "flexible";
 
     @IsOptional()
     @IsBoolean()
@@ -247,13 +230,7 @@ export class UpdateVacancyDto {
     salaryRangeTo?: number;
 
     // Cross-field validation for salary (only if both fields present)
-    @Validate(Validator.custom(({ salaryRangeFrom, salaryRangeTo }) => {
-        // If both are defined, validate; otherwise skip (partial update)
-        if (salaryRangeFrom !== undefined && salaryRangeTo !== undefined) {
-            return salaryRangeFrom <= salaryRangeTo;
-        }
-        return true;
-    }, { message: 'salaryRangeFrom must be less than or equal to salaryRangeTo' }))
+
 
     @IsOptional()
     file?: {
@@ -298,14 +275,7 @@ export class UpdateVacancyDto {
     isActive?: number;
 
     // Date cross-field validation (only if both dates provided)
-    @Validate(Validator.custom(({ requisitionDate, requiredDate }) => {
-        if (requisitionDate !== undefined && requiredDate !== undefined) {
-            const req = new Date(requisitionDate);
-            const reqd = new Date(requiredDate);
-            return req <= reqd;
-        }
-        return true;
-    }, { message: 'requisitionDate must be before or equal to requiredDate' }))
+
 
     // New enhanced fields
     @IsOptional()
@@ -314,7 +284,7 @@ export class UpdateVacancyDto {
 
     @IsOptional()
     @IsIn(['low', 'medium', 'high', 'urgent'])
-    priority?: string;
+    priority?: "low" | "medium" | "high" | "urgent";
 
     @IsOptional()
     @IsNumber()
@@ -326,16 +296,11 @@ export class UpdateVacancyDto {
     @Min(0)
     experienceMax?: number;
 
-    @Validate(Validator.custom(({ experienceMin, experienceMax }) => {
-        if (experienceMin !== undefined && experienceMax !== undefined) {
-            return experienceMin <= experienceMax;
-        }
-        return true;
-    }, { message: 'experienceMin must be less than or equal to experienceMax' }))
+
 
     @IsOptional()
     @IsIn(['onsite', 'hybrid', 'remote', 'flexible'])
-    workLocationType?: string;
+    workLocationType?: "onsite" | "hybrid" | "remote" | "flexible";
 
     @IsOptional()
     @IsBoolean()
@@ -376,5 +341,5 @@ export class UpdateVacancyApprovalDto {
     @IsNotEmpty()
     @IsIn(['pending', 'approved', 'rejected', 'cancelled'])
     approvalStatus: string;
-    remarks: null;
+    remarks?: string | null;
 }

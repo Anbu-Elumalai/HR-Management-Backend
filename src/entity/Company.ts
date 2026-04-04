@@ -1,12 +1,8 @@
-
 import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm"
 import { ObjectId } from "mongodb";
 
-@Entity("projects")
-export class Project {
-
-
-    @Column() companyId!: ObjectId;
+@Entity("companies")
+export class Company {
 
     @ObjectIdColumn()
     id!: ObjectId;
@@ -15,37 +11,58 @@ export class Project {
     name!: string;
 
     @Column()
-    code!: string;
+    email!: string;
+
+    @Column()
+    phoneNumber!: string;
+
+    @Column()
+    address!: string;
+
+    @Column()
+    logo!: string;
+
+    @Column()
+    website!: string;
 
     @Column()
     description!: string;
 
     @Column()
-    startDate!: Date;
+    industry!: string;
 
     @Column()
-    endDate!: Date;
-
-    @Column()
-    status!: string;
-
-    @Column()
-    manager!: string;
+    companySize!: string;
 
     @Column()
     location!: string;
 
     @Column()
-    createdBy!: ObjectId;
+    country!: string;
 
     @Column()
-    updatedBy!: ObjectId;
+    state!: string;
+
+    @Column()
+    city!: string;
+
+    @Column()
+    zipCode!: string;
+
+    @Column()
+    timezone!: string;
 
     @Column({ default: 1 })
     isActive!: number;
 
     @Column({ default: 0 })
     isDelete!: number;
+
+    @Column()
+    createdBy!: ObjectId;
+
+    @Column()
+    updatedBy!: ObjectId;
 
     @CreateDateColumn()
     createdAt!: Date;

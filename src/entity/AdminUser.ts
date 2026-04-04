@@ -23,6 +23,9 @@ export class AdminUser {
     email!: string;
 
     @Column()
+    companyId!: ObjectId;
+    
+    @Column()
     companyName!: string;
 
     @Column()

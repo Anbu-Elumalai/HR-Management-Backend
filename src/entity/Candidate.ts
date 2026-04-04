@@ -8,6 +8,9 @@ export class Candidate {
     id!: ObjectId;
 
     @Column()
+    companyId!: ObjectId;
+
+    @Column()
     candidateCode!: string;
 
     @Column()

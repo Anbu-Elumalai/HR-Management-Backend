@@ -3,6 +3,9 @@ import { ObjectId } from "mongodb";
 
 @Entity("user_tokens")
 export class UserToken {
+
+
+    @Column() companyId!: ObjectId;
     @ObjectIdColumn()
     _id!: ObjectId;
 

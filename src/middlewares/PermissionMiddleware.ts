@@ -1,13 +1,17 @@
 import { hasPermission } from "../utils/common.function";
 import { AppDataSource } from "../data-source";
-import { Role } from "../entity/Role.Permission";
 import { ObjectId } from "mongodb";
+import { Role } from "../entity/Role.Permission";
 
 export const canAccess = (feature: string, action: any) => {
     return async (req, res, next) => {
         try {
+            console.log(req.user, 'req.user');
+
             // req.user.roleId is set by AuthMiddleware from JWT
             const roleId = req.user.roleId || req.user.role?._id;
+            console.log(roleId, 'roleId');
+
             if (!roleId) {
                 return res.status(403).json({ message: "Role not found in token" });
             }

@@ -4,6 +4,9 @@ import { ObjectId } from "mongodb";
 @Entity("employment_types")
 export class EmploymentType {
 
+
+    @Column() companyId!: ObjectId;
+
     @ObjectIdColumn()
     id!: ObjectId;
 

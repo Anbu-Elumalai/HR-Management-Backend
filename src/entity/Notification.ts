@@ -8,7 +8,10 @@ import {
 import { ObjectId } from "mongodb";
 
 @Entity("notifications")
-export class Notifications {
+export class Notification {
+
+
+    @Column() companyId!: ObjectId;
     @ObjectIdColumn()
     _id!: ObjectId;
 

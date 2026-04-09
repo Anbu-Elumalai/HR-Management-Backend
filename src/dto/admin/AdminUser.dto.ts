@@ -12,7 +12,7 @@ import { Type } from "class-transformer";
 export class CreateAdminUserDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name!: string;
 
     @IsOptional()
     profileImage?: {
@@ -26,21 +26,21 @@ export class CreateAdminUserDto {
         };
 
     @IsEmail()
-    email: string;
+    email!: string;
 
     @IsString()
-    companyName: string;
+    companyName!: string;
 
     @IsPhoneNumber("IN")
     @IsNotEmpty()
-    phoneNumber: string;
+    phoneNumber!: string;
 
     @Length(4)
     @IsString()
-    pin: string;
+    pin!: string;
 
     @IsMongoId()
-    roleId: string;
+    roleId!: string;
 
     @IsOptional()
     @Type(() => Number)

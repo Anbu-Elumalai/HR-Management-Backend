@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "lib": [
-      "es2021"
+      "es2021",
+      "dom"
     ],
     "target": "es2021",
     "module": "commonjs",
@@ -13,6 +14,7 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
   },
   "include": [
     "src/**/*.ts",
@@ -20,6 +22,7 @@
   ],
   "exclude": [
     "node_modules",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/migrations"
   ]
 }

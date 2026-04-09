@@ -4,7 +4,7 @@ import { IsString, IsNotEmpty, IsEnum, IsOptional } from "class-validator";
 export class CreateMasterDataDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name!: string;
 
 }
 

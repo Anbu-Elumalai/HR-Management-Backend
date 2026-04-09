@@ -2,7 +2,6 @@
 // import { AppDataSource } from "../data-source";
 // import { Notifications } from "../entity/Notification";
 // import { sendPushNotification } from "./pushNotification.Service";
-// import { Member } from "../entity/Member";
 
 // export class NotificationService {
 //   private notificationRepo = AppDataSource.getMongoRepository(Notifications);

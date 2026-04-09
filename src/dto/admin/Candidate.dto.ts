@@ -10,35 +10,35 @@ import {
 export class CreateCandidateDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name!: string;
 
     @IsEmail()
     @IsNotEmpty()
-    email: string;
+    email!: string;
 
     @IsString()
     @IsNotEmpty()
-    phone: string;
+    phone!: string;
 
     @IsString()
     @IsNotEmpty()
-    role: string;
+    role!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    vacancyId: string;
+    vacancyId!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    departmentId: string;
+    departmentId!: string;
 
     @IsNotEmpty()
     @IsString()
-    experience: string;
+    experience!: string;
 
     @IsString()
     @IsNotEmpty()
-    noticePeriod: string;
+    noticePeriod!: string;
 
     @IsString()
     @IsOptional()
@@ -46,23 +46,23 @@ export class CreateCandidateDto {
 
     @IsString()
     @IsNotEmpty()
-    source: string;
+    source!: string;
 
     @IsString()
     @IsNotEmpty()
-    currentCompany: string;
+    currentCompany!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    currentLocation: string;
+    currentLocation!: string;
 
     @IsNotEmpty()
     @IsString()
-    currentCTC: string;
+    currentCTC!: string;
 
     @IsNotEmpty()
     @IsString()
-    expectedCTC: string;
+    expectedCTC!: string;
 
     @IsString()
     @IsOptional()
@@ -86,7 +86,7 @@ export class CreateCandidateDto {
 
     @IsString()
     @IsNotEmpty()
-    highestQualification: string;
+    highestQualification!: string;
 
     @IsString()
     @IsOptional()
@@ -94,19 +94,19 @@ export class CreateCandidateDto {
 
     @IsNotEmpty()
     @IsDateString()
-    availableToJoin: string;
+    availableToJoin!: string;
 
     @IsNotEmpty()
     @IsDateString()
-    dob: string;
+    dob!: string;
 
     @IsString()
     @IsNotEmpty()
-    gender: string;
+    gender!: string;
 
     @IsString()
     @IsNotEmpty()
-    address: string;
+    address!: string;
 
     @IsOptional()
     resumeFile?: {

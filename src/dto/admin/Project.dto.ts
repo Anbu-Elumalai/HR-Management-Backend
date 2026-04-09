@@ -18,19 +18,19 @@ export enum ProjectStatus {
 export class CreateProjectDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name!: string;
 
     @IsString()
     @IsOptional()
-    description: string;
+    description?: string;
 
     @IsNotEmpty()
     @IsDateString()
-    startDate: string;
+    startDate!: string;
 
     @IsNotEmpty()
     @IsDateString()
-    endDate: string;
+    endDate!: string;
 
     @IsEnum(ProjectStatus)
     @IsOptional()
@@ -38,11 +38,11 @@ export class CreateProjectDto {
 
     @IsString()
     @IsOptional()
-    manager: string;
+    manager?: string;
 
     @IsString()
     @IsOptional()
-    location: string;
+    location?: string;
 }
 
 export class UpdateProjectDto {

@@ -26,18 +26,18 @@ export class PermissionActionsDto {
 export class RolePermissionDto {
     @IsMongoId()
     @IsNotEmpty()
-    moduleId: string;
+    moduleId!: string;
 
     @ValidateNested()
     @Type(() => PermissionActionsDto)
     @IsNotEmpty()
-    actions: PermissionActionsDto;
+    actions!: PermissionActionsDto;
 }
 
 export class CreateRoleDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name!: string;
 
     @IsOptional()
     @IsBoolean()
@@ -50,7 +50,7 @@ export class CreateRoleDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => RolePermissionDto)
-    permissions: RolePermissionDto[];
+    permissions!: RolePermissionDto[];
 }
 
 export class UpdateRoleDto {

@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, IsOptional } from "class-validator";
 export class CreateEmploymentTypeDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name!: string;
 }
 
 export class UpdateEmploymentTypeDto {

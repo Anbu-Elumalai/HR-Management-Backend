@@ -2,8 +2,8 @@
 // Date: 2026-04-03
 // Purpose: Add new fields, indexes, and update existing data
 
-import { AppDataSource } from "../src/data-source";
-import { Vacancy } from "../src/entity/Vacancy";
+import { AppDataSource } from "../data-source";
+import { Vacancy } from "../entity/Vacancy";
 
 async function up() {
   console.log("Starting vacancy migration...");
@@ -87,7 +87,7 @@ async function up() {
   console.log(`Backfilled agingDays for ${vacancies.length} vacancies`);
 
   // 4. Backfill applicantCount and filledCount from candidates collection
-  const Candidate = require("./src/entity/Candidate").Candidate;
+  const Candidate = require("../entity/Candidate").Candidate;
   const candidateRepo = AppDataSource.getMongoRepository(Candidate);
 
   for (const v of vacancies) {

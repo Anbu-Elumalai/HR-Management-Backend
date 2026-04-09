@@ -23,27 +23,27 @@ export enum OfferStatus {
 class SalaryBreakdownDto {
     @IsNumber()
     @IsNotEmpty()
-    basic: number;
+    basic!: number;
 
     @IsNumber()
     @IsNotEmpty()
-    hra: number;
+    hra!: number;
 
     @IsNumber()
     @IsNotEmpty()
-    specialAllowance: number;
+    specialAllowance!: number;
 
     @IsNumber()
     @IsNotEmpty()
-    pf: number;
+    pf!: number;
 
     @IsNumber()
     @IsNotEmpty()
-    gratuity: number;
+    gratuity!: number;
 
     @IsNumber()
     @IsNotEmpty()
-    medicalInsurance: number;
+    medicalInsurance!: number;
 }
 
 export class CreateOfferDto {
@@ -53,40 +53,40 @@ export class CreateOfferDto {
 
     @IsMongoId()
     @IsNotEmpty()
-    candidateId: string;
+    candidateId!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    vacancyId: string;
+    vacancyId!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    departmentId: string;
+    departmentId!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    reportingManager: string;
+    reportingManager!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    workLocationId: string;
+    workLocationId!: string;
 
     @IsString()
     @IsNotEmpty()
-    workMode: string;
+    workMode!: string;
 
     @IsNotEmpty()
     @IsDateString()
-    joiningDate: string;
+    joiningDate!: string;
 
     @IsNotEmpty()
     @IsDateString()
-    offerExpiryDate: string;
+    offerExpiryDate!: string;
 
     @IsNumber()
     @IsNotEmpty()
     @Type(() => Number)
-    ctc: number;
+    ctc!: number;
 
     @IsEnum(OfferStatus)
     @IsOptional()
@@ -107,7 +107,7 @@ export class CreateOfferDto {
     @ValidateNested()
     @Type(() => SalaryBreakdownDto)
     @IsNotEmpty()
-    salaryBreakdown: SalaryBreakdownDto;
+    salaryBreakdown!: SalaryBreakdownDto;
 }
 
 export class UpdateOfferDto {
@@ -181,7 +181,7 @@ export class UpdateOfferDto {
 export class UpdateOfferStatusDto {
     @IsEnum(OfferStatus)
     @IsNotEmpty()
-    status: OfferStatus;
+    status!: OfferStatus;
 
     @IsString()
     @IsOptional()

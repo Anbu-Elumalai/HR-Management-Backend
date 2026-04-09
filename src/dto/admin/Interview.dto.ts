@@ -13,29 +13,29 @@ import { Type } from "class-transformer";
 class PanelMemberDto {
     @IsString()
     @IsNotEmpty()
-    interviewerType: string;
+    interviewerType!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    employeeId: string;
+    employeeId!: string;
 
     @IsString()
     @IsNotEmpty()
-    panelRole: string;
+    panelRole!: string;
 }
 
 export class CreateInterviewDto {
     @IsMongoId()
     @IsNotEmpty()
-    candidateId: string;
+    candidateId!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    vacancyId: string;
+    vacancyId!: string;
 
     @IsMongoId()
     @IsNotEmpty()
-    round: string;
+    round!: string;
 
     @IsNumber()
     @IsOptional()
@@ -44,28 +44,28 @@ export class CreateInterviewDto {
 
     @IsString()
     @IsNotEmpty()
-    level: string;
+    level!: string;
 
     @IsString()
     @IsNotEmpty()
-    type: string;
+    type!: string;
 
     @IsString()
     @IsNotEmpty()
-    mode: string;
+    mode!: string;
 
     @IsNotEmpty()
     @IsDateString()
-    scheduleDate: string;
+    scheduleDate!: string;
 
     @IsString()
     @IsNotEmpty()
-    time: string;
+    time!: string;
 
     @IsNumber()
     @IsNotEmpty()
     @Type(() => Number)
-    duration: number;
+    duration!: number;
 
     @IsString()
     @IsOptional()
@@ -73,19 +73,19 @@ export class CreateInterviewDto {
 
     @IsString()
     @IsNotEmpty()
-    email: string;
+    email!: string;
 
     @IsString()
     @IsNotEmpty()
-    phone: string;
+    phone!: string;
 
     @IsString()
     @IsNotEmpty()
-    timezone: string;
+    timezone!: string;
 
     @IsString()
     @IsNotEmpty()
-    platform: string;
+    platform!: string;
 
     @IsString()
     @IsOptional()
@@ -110,7 +110,7 @@ export class CreateInterviewDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => PanelMemberDto)
-    panelMembers: PanelMemberDto[];
+    panelMembers!: PanelMemberDto[];
 }
 
 export class UpdateInterviewDto {
@@ -210,7 +210,7 @@ export class UpdateInterviewDto {
 export class UpdateInterviewStatusDto {
     @IsString()
     @IsNotEmpty()
-    status: string;
+    status!: string;
 
     @IsString()
     @IsOptional()
@@ -228,9 +228,9 @@ export class UpdateInterviewStatusDto {
 export class UpdateInterviewFeedbackDto {
     @IsString()
     @IsNotEmpty()
-    feedback: string;
+    feedback!: string;
 
     @IsString()
     @IsNotEmpty()
-    interviewResult: string;
+    interviewResult!: string;
 }

@@ -11,7 +11,7 @@ import { Type } from "class-transformer";
 export class CreateModuleDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name!: string;
 
     @IsOptional()
     @IsNumber()

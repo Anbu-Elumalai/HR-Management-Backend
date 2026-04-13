@@ -378,7 +378,8 @@ export class InterviewController {
                                     type: 1,
                                     mode: 1,
                                     status: 1,
-                                    feedback: 1
+                                    feedback: 1,
+                                    interviewResult: 1
                                 }
                             }
                         ],
@@ -723,8 +724,17 @@ export class InterviewController {
                 return response(res, StatusCodes.NOT_FOUND, "Interview not found");
             }
 
+            // Validation: if result is final (not Pending/On Hold), interview must be Completed
+            const resultLower = body.interviewResult?.toLowerCase();
+            if (resultLower !== "pending" && resultLower !== "on hold") {
+                if (interview.status !== "Completed") {
+                    return response(res, StatusCodes.BAD_REQUEST, "Interview must be 'Completed' before submitting a final result");
+                }
+            }
+
             interview.feedback = body.feedback;
             interview.interviewResult = body.interviewResult;
+            interview.status = "Completed"; // Update status to Completed
 
             interview.updatedBy = new ObjectId(userId);
             await this.interviewRepo.save(interview);

@@ -214,6 +214,51 @@ export class OfferController {
         }
     }
 
+    @Get("/summary/counts")
+    async getCounts(@Req() req: RequestWithUser, @Res() res: Response) {
+        try {
+            const { companyId } = req.user;
+            const companyObjectId = new ObjectId(companyId);
+
+            const pipeline = [
+                { 
+                    $match: { 
+                        companyId: companyObjectId,
+                        isDelete: 0 
+                    } 
+                },
+                {
+                    $facet: {
+                        totalOffers: [{ $count: "count" }],
+                        draft: [{ $match: { status: "Draft" } }, { $count: "count" }],
+                        pendingApproval: [{ $match: { status: "Pending Approval" } }, { $count: "count" }],
+                        sent: [{ $match: { status: "Sent" } }, { $count: "count" }],
+                        accepted: [{ $match: { status: "Accepted" } }, { $count: "count" }],
+                        rejected: [{ $match: { status: "Rejected" } }, { $count: "count" }],
+                        expired: [{ $match: { status: "Expired" } }, { $count: "count" }]
+                    }
+                },
+                {
+                    $project: {
+                        totalOffers: { $ifNull: [{ $arrayElemAt: ["$totalOffers.count", 0] }, 0] },
+                        draft: { $ifNull: [{ $arrayElemAt: ["$draft.count", 0] }, 0] },
+                        pendingApproval: { $ifNull: [{ $arrayElemAt: ["$pendingApproval.count", 0] }, 0] },
+                        sent: { $ifNull: [{ $arrayElemAt: ["$sent.count", 0] }, 0] },
+                        accepted: { $ifNull: [{ $arrayElemAt: ["$accepted.count", 0] }, 0] },
+                        rejected: { $ifNull: [{ $arrayElemAt: ["$rejected.count", 0] }, 0] },
+                        expired: { $ifNull: [{ $arrayElemAt: ["$expired.count", 0] }, 0] }
+                    }
+                }
+            ];
+
+            const [counts] = await this.offerRepo.aggregate(pipeline).toArray();
+
+            return response(res, StatusCodes.OK, "Offer counts fetched successfully", counts);
+        } catch (error) {
+            return handleErrorResponse(error, res);
+        }
+    }
+
     @Get("/:id")
     async getOne(@Param("id") id: string, @Res() res: Response) {
         try {

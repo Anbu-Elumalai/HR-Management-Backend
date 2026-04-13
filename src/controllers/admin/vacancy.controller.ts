@@ -373,7 +373,15 @@ export class VacancyController {
                 },
                 {
                     $addFields: {
-                        remainingPositions: { $subtract: ["$numberOfVacancy", "$filledPositions"] }
+                        remainingPositions: { $subtract: ["$numberOfVacancy", "$filledPositions"] },
+                        appliedApplicants: { $size: "$candidates" },
+                        openings: {
+                            $concat: [
+                                { $toString: { $ifNull: ["$filledPositions", 0] } },
+                                " / ",
+                                { $toString: { $ifNull: ["$numberOfVacancy", 0] } }
+                            ]
+                        }
                     }
                 },
                 {

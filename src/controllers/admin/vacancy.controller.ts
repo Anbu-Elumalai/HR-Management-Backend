@@ -259,6 +259,111 @@ export class VacancyController {
         }
     }
 
+    @Get("/dashboard/stats")
+    @UseBefore(canAccess("vacancies", "view"))
+    async dashboardStats(@Res() res: Response) {
+        try {
+            const now = new Date();
+            const currentPeriodStart = new Date();
+            currentPeriodStart.setDate(now.getDate() - 30);
+
+            const previousPeriodStart = new Date();
+            previousPeriodStart.setDate(now.getDate() - 60);
+
+
+            const pipeline: any[] = [
+                { $match: { isDelete: 0 } },
+                {
+                    $facet: {
+                        current: [
+                            { $match: { createdAt: { $gte: currentPeriodStart } } },
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 },
+                                    open: { $sum: { $cond: [{ $eq: ["$status", "open"] }, 1, 0] } },
+                                    draft: { $sum: { $cond: [{ $eq: ["$status", "draft"] }, 1, 0] } },
+                                    pending: { $sum: { $cond: [{ $eq: ["$approvalStatus", "pending"] }, 1, 0] } },
+                                    filled: { $sum: { $cond: [{ $eq: ["$status", "filled"] }, 1, 0] } },
+                                    cancelled: { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] } }
+                                }
+                            }
+                        ],
+                        previous: [
+                            { $match: { createdAt: { $gte: previousPeriodStart, $lt: currentPeriodStart } } },
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 },
+                                    open: { $sum: { $cond: [{ $eq: ["$status", "open"] }, 1, 0] } },
+                                    draft: { $sum: { $cond: [{ $eq: ["$status", "draft"] }, 1, 0] } },
+                                    pending: { $sum: { $cond: [{ $eq: ["$approvalStatus", "pending"] }, 1, 0] } },
+                                    filled: { $sum: { $cond: [{ $eq: ["$status", "filled"] }, 1, 0] } },
+                                    cancelled: { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] } }
+                                }
+                            }
+                        ],
+                        overall: [
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 },
+                                    open: { $sum: { $cond: [{ $eq: ["$status", "open"] }, 1, 0] } },
+                                    draft: { $sum: { $cond: [{ $eq: ["$status", "draft"] }, 1, 0] } },
+                                    pending: { $sum: { $cond: [{ $eq: ["$approvalStatus", "pending"] }, 1, 0] } },
+                                    filled: { $sum: { $cond: [{ $eq: ["$status", "filled"] }, 1, 0] } },
+                                    cancelled: { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] } }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ];
+
+            const [result] = await this.vacancyRepo.aggregate(pipeline).toArray();
+
+            const overall = result?.overall?.[0] || { total: 0, open: 0, draft: 0, pending: 0, filled: 0, cancelled: 0 };
+            const current = result?.current?.[0] || { total: 0, open: 0, draft: 0, pending: 0, filled: 0, cancelled: 0 };
+            const previous = result?.previous?.[0] || { total: 0, open: 0, draft: 0, pending: 0, filled: 0, cancelled: 0 };
+
+            const calculateTrend = (curr: number, prev: number) => {
+                if (prev === 0) return curr > 0 ? 100 : 0;
+                return Math.round(((curr - prev) / prev) * 100);
+            };
+
+            const stats = {
+                totalVacancies: {
+                    count: overall.total,
+                    trend: calculateTrend(current.total, previous.total)
+                },
+                openPositions: {
+                    count: overall.open,
+                    trend: calculateTrend(current.open, previous.open)
+                },
+                draftJobs: {
+                    count: overall.draft,
+                    trend: calculateTrend(current.draft, previous.draft)
+                },
+                pendingApproval: {
+                    count: overall.pending,
+                    trend: calculateTrend(current.pending, previous.pending)
+                },
+                filledJobs: {
+                    count: overall.filled,
+                    trend: calculateTrend(current.filled, previous.filled)
+                },
+                cancelled: {
+                    count: overall.cancelled,
+                    trend: calculateTrend(current.cancelled, previous.cancelled)
+                }
+            };
+
+            return response(res, StatusCodes.OK, "Dashboard stats fetched successfully", stats);
+        } catch (error) {
+            return handleErrorResponse(error, res);
+        }
+    }
+
     @Get("/")
     @UseBefore(canAccess("vacancies", "view"))
     async list(
@@ -270,34 +375,51 @@ export class VacancyController {
             const page = Math.max(Number(query.page) || 0, 0);
             const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
             const search = query.search?.toString();
-
             const match: any = { isDelete: 0 };
-
-            if (search) {
-                match.$or = [{ requestNumber: { $regex: search, $options: "i" } }];
-            }
 
             if (query.vacancyCode) {
                 match.requestNumber = { $regex: query.vacancyCode, $options: "i" };
             }
+
             if (query.vacancies) {
                 match.numberOfVacancy = Number(query.vacancies);
             }
+
             if (query.targetDate) {
-                match.requiredDate = new Date(query.targetDate);
+                try {
+                    const targetDate = new Date(query.targetDate);
+                    if (!isNaN(targetDate.getTime())) {
+                        const startOfDay = new Date(targetDate);
+                        startOfDay.setHours(0, 0, 0, 0);
+                        const endOfDay = new Date(targetDate);
+                        endOfDay.setHours(23, 59, 59, 999);
+                        match.requiredDate = { $gte: startOfDay, $lte: endOfDay };
+                    }
+                } catch (e) {
+                    console.error("Invalid targetDate format:", query.targetDate);
+                }
             }
+
             if (query.approval) {
                 match.approvalStatus = { $regex: query.approval, $options: "i" };
+            }
+
+            if (query.status) {
+                match.status = { $regex: query.status, $options: "i" };
+            }
+
+            if (query.priority) {
+                match.priority = { $regex: query.priority, $options: "i" };
+            }
+
+            if (query.locationFilter) {
+                match.location = { $regex: query.locationFilter, $options: "i" };
             }
 
             if (query.departmentId) match.departmentId = new ObjectId(query.departmentId);
             if (query.positionId) match.positionId = new ObjectId(query.positionId);
             if (query.employeeTypeId) match.employeeTypeId = new ObjectId(query.employeeTypeId);
             if (query.gender) match.gender = query.gender;
-
-            if (query.status) {
-                match.status = { $regex: query.status, $options: "i" };
-            }
 
             if (query.isActive !== undefined && !query.status) {
                 match.isActive = query.isActive === "true" || query.isActive === "1" || query.isActive === 1 ? 1 : 0;
@@ -393,13 +515,26 @@ export class VacancyController {
 
             const postMatch: any = {};
 
+            if (search) {
+                postMatch.$or = [
+                    { requestNumber: { $regex: search, $options: "i" } },
+                    { "position.name": { $regex: search, $options: "i" } },
+                    { "department.name": { $regex: search, $options: "i" } },
+                    { "employeeType.name": { $regex: search, $options: "i" } },
+                    { "projectData.name": { $regex: search, $options: "i" } },
+                    { location: { $regex: search, $options: "i" } },
+                    { status: { $regex: search, $options: "i" } },
+                    { approvalStatus: { $regex: search, $options: "i" } }
+                ];
+            }
+
             if (query.position) postMatch["position.name"] = { $regex: query.position, $options: "i" };
             if (query.department) postMatch["department.name"] = { $regex: query.department, $options: "i" };
             if (query.hiringType) postMatch["employeeType.name"] = { $regex: query.hiringType, $options: "i" };
             if (query.project) postMatch["projectData.name"] = { $regex: query.project, $options: "i" };
 
-            if (query.filled) postMatch.filledPositions = Number(query.filled);
-            if (query.remaining) postMatch.remainingPositions = Number(query.remaining);
+            if (query.filled !== undefined && query.filled !== "") postMatch.filledPositions = Number(query.filled);
+            if (query.remaining !== undefined && query.remaining !== "") postMatch.remainingPositions = Number(query.remaining);
 
             if (Object.keys(postMatch).length > 0) {
                 pipeline.push({ $match: postMatch });

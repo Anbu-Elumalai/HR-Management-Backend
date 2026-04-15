@@ -115,6 +115,140 @@ export class CandidateController {
         }
     }
 
+    @Get("/dashboard/stats")
+    async dashboardStats(@Res() res: Response) {
+        try {
+            const now = new Date();
+            const currentPeriodStart = new Date();
+            currentPeriodStart.setDate(now.getDate() - 30);
+
+            const previousPeriodStart = new Date();
+            previousPeriodStart.setDate(now.getDate() - 60);
+
+            const pipeline: any[] = [
+                { $match: { isDelete: 0 } },
+                {
+                    $facet: {
+                        current: [
+                            { $match: { createdAt: { $gte: currentPeriodStart } } },
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 },
+                                    newApplicants: { $sum: { $cond: [{ $eq: ["$status", "New"] }, 1, 0] } },
+                                    shortlisted: { $sum: { $cond: [{ $eq: ["$status", "Shortlisted"] }, 1, 0] } },
+                                    interviewing: { $sum: { $cond: [{ $eq: ["$status", "Interviewing"] }, 1, 0] } },
+                                    offered: { $sum: { $cond: [{ $eq: ["$status", "Offered"] }, 1, 0] } },
+                                    hired: { $sum: { $cond: [{ $eq: ["$status", "hired"] }, 1, 0] } },
+                                    rejected: { $sum: { $cond: [{ $eq: ["$status", "Rejected"] }, 1, 0] } }
+                                }
+                            }
+                        ],
+                        previous: [
+                            { $match: { createdAt: { $gte: previousPeriodStart, $lt: currentPeriodStart } } },
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 },
+                                    newApplicants: { $sum: { $cond: [{ $eq: ["$status", "New"] }, 1, 0] } },
+                                    shortlisted: { $sum: { $cond: [{ $eq: ["$status", "Shortlisted"] }, 1, 0] } },
+                                    interviewing: { $sum: { $cond: [{ $eq: ["$status", "Interviewing"] }, 1, 0] } },
+                                    offered: { $sum: { $cond: [{ $eq: ["$status", "Offered"] }, 1, 0] } },
+                                    hired: { $sum: { $cond: [{ $eq: ["$status", "hired"] }, 1, 0] } },
+                                    rejected: { $sum: { $cond: [{ $eq: ["$status", "Rejected"] }, 1, 0] } }
+                                }
+                            }
+                        ],
+                        overall: [
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 },
+                                    newApplicants: { $sum: { $cond: [{ $eq: ["$status", "New"] }, 1, 0] } },
+                                    shortlisted: { $sum: { $cond: [{ $eq: ["$status", "Shortlisted"] }, 1, 0] } },
+                                    interviewing: { $sum: { $cond: [{ $eq: ["$status", "Interviewing"] }, 1, 0] } },
+                                    offered: { $sum: { $cond: [{ $eq: ["$status", "Offered"] }, 1, 0] } },
+                                    hired: { $sum: { $cond: [{ $eq: ["$status", "hired"] }, 1, 0] } },
+                                    rejected: { $sum: { $cond: [{ $eq: ["$status", "Rejected"] }, 1, 0] } }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ];
+
+            const [result] = await this.candidateRepo.aggregate(pipeline).toArray();
+
+            const overall = result?.overall?.[0] || { 
+                total: 0, 
+                newApplicants: 0, 
+                shortlisted: 0, 
+                interviewing: 0, 
+                offered: 0, 
+                hired: 0, 
+                rejected: 0 
+            };
+            const current = result?.current?.[0] || { 
+                total: 0, 
+                newApplicants: 0, 
+                shortlisted: 0, 
+                interviewing: 0, 
+                offered: 0, 
+                hired: 0, 
+                rejected: 0 
+            };
+            const previous = result?.previous?.[0] || { 
+                total: 0, 
+                newApplicants: 0, 
+                shortlisted: 0, 
+                interviewing: 0, 
+                offered: 0, 
+                hired: 0, 
+                rejected: 0 
+            };
+
+            const calculateTrend = (curr: number, prev: number) => {
+                if (prev === 0) return curr > 0 ? 100 : 0;
+                return Math.round(((curr - prev) / prev) * 100);
+            };
+
+            const stats = {
+                totalCandidates: {
+                    count: overall.total,
+                    trend: calculateTrend(current.total, previous.total)
+                },
+                newApplicants: {
+                    count: overall.newApplicants,
+                    trend: calculateTrend(current.newApplicants, previous.newApplicants)
+                },
+                shortlisted: {
+                    count: overall.shortlisted,
+                    trend: calculateTrend(current.shortlisted, previous.shortlisted)
+                },
+                interviewing: {
+                    count: overall.interviewing,
+                    trend: calculateTrend(current.interviewing, previous.interviewing)
+                },
+                offered: {
+                    count: overall.offered,
+                    trend: calculateTrend(current.offered, previous.offered)
+                },
+                hired: {
+                    count: overall.hired,
+                    trend: calculateTrend(current.hired, previous.hired)
+                },
+                rejected: {
+                    count: overall.rejected,
+                    trend: calculateTrend(current.rejected, previous.rejected)
+                }
+            };
+
+            return response(res, StatusCodes.OK, "Dashboard stats fetched successfully", stats);
+        } catch (error) {
+            return handleErrorResponse(error, res);
+        }
+    }
+
     @Get("/")
     async list(
         @QueryParams() query: any,

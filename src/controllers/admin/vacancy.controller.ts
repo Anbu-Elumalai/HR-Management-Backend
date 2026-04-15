@@ -736,6 +736,19 @@ export class VacancyController {
                     return response(res, StatusCodes.BAD_REQUEST, "Vacancy must be approved before opening");
                 }
 
+                if (body.status === "filled") {
+                    if (vacancy.approvalStatus !== "approved") {
+                        return response(res, StatusCodes.BAD_REQUEST, "Vacancy must be approved before marking as filled");
+                    }
+                    if (vacancy.filledCount < vacancy.numberOfVacancy) {
+                        return response(
+                            res,
+                            StatusCodes.BAD_REQUEST,
+                            "Vacancy can only be marked as filled after the filled count reaches the total number of vacancies"
+                        );
+                    }
+                }
+
                 vacancy.status = body.status;
             }
 
@@ -829,6 +842,19 @@ export class VacancyController {
 
             if (body.status === "open" && vacancy.approvalStatus !== "approved") {
                 return response(res, StatusCodes.BAD_REQUEST, "Vacancy must be approved before opening. Please approve first.");
+            }
+
+            if (body.status === "filled") {
+                if (vacancy.approvalStatus !== "approved") {
+                    return response(res, StatusCodes.BAD_REQUEST, "Vacancy must be approved before marking as filled. Please approve first.");
+                }
+                if (vacancy.filledCount < vacancy.numberOfVacancy) {
+                    return response(
+                        res,
+                        StatusCodes.BAD_REQUEST,
+                        "Vacancy can only be marked as filled after the filled count reaches the total number of vacancies"
+                    );
+                }
             }
 
             const statusHistory = vacancy.statusHistory || [];
